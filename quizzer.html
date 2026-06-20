@@ -78,6 +78,7 @@
             top: 0px;
             left: 47px;
             z-index: 0;
+            display: none;
         }
         #streak-num {
             color: black;
@@ -93,14 +94,19 @@
         .char, #shift {
             font-size: 1.5em;
         }
-        
+        #link-to-home {
+            position: absolute;
+            left: 10px;
+            top: 10px;
+        }
     </style>
 </head>
 <body>
+    <a id="link-to-home" href="index.html"><img src="Spanish Quizzer logo.png" width="50px" alt="Spanish quizzer logo"></a>
     <div id="quiz-box" data-current-question="" data-question-array="">
         <div id="content">
         <p id="streak">Streak:  <span id="streak-num">0</span></p>
-        <img id="flaming-icon" src="" width="70px">
+        <img id="flaming-icon" src="flaming-streak-icon.png" alt="Flaming streak icon" width="70px">
         <h1 id="quiz-title">Quiz Mode</h1>
         <h1 id="question"></h1>
         <div id="button-bar">
@@ -563,7 +569,6 @@
     let streak = 0;
     let oldStreak = 0;
     let shift = "lowercase"
-    let flamingIconSrc = "flaming-streak-icon.png"
     const getQuestionArray = function () {
         const questions = $("#quiz-box").attr("data-question-array");
         if (questions.length === 0) {
@@ -572,7 +577,7 @@
         return questions.split(",")
     }
     const changeQuestionArray = function (array) {
-        $("#quiz-box").attr("data-question-array", array.join())
+        $("#quiz-box").attr("data-question-array", array.join());
     }
     const getCurrentQuestion = function () {
         return $("#quiz-box").attr("data-current-question")
@@ -581,13 +586,13 @@
         return $("#quiz-box").attr("data-current-question", newQuestion)
     }
     const refreshStreak = function (newStreak) {
-        $("#streak-num").text(newStreak)
+        $("#streak-num").text(newStreak);
         if (newStreak >= 5) {
-            $("#flaming-icon").attr("src", flamingIconSrc)
-            $("#streak-num").css("color", "red")
+            $("#flaming-icon").css("display", "none");
+            $("#streak-num").css("color", "red");
         } else {
-            $("#flaming-icon").attr("src", "")
-            $("#streak-num").css("color", "black")
+            $("#flaming-icon").css("display", "inline");
+            $("#streak-num").css("color", "black");
         }
     }
     const shuffleArray = function (array){
