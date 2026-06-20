@@ -1,0 +1,888 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quizzer</title>
+    <link rel="icon" href="Spanish Quizzer logo.png" type="image/png">
+    <style>
+        body {
+            text-align: center;
+            font-family: Verdana, Roboto, Arial, Calibri, Georgia, sans-serif;
+        }
+        #quiz-box {
+            width: 90%;
+            height: 90%;
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background-color: #e5e5e5;
+            border-radius: 5%;
+        }
+        #content {
+            display: none;
+        }
+        #quiz-title {
+            text-align: center;
+            font-size: 2em;
+            margin-top: 20px;
+            margin-bottom: 20px;
+        }
+        .answer-explanation {
+            text-align: center;
+            display: none;
+        }
+        #question {
+            text-align: center;
+            font-size: 1.5em;
+            margin-top: 50px;
+            margin-bottom: 20px;
+        }
+        .answer-form {
+            text-align: center;
+            font-size: 2em;
+            margin-top: 5px;
+            width: 50%
+        }
+        #next-question{
+            display: none;
+            font-size: 2em;
+        }
+        #manual-grading {
+            display: none;
+            font-size: 2em;
+            margin-top: 20px;
+        }
+        .topic-selection {
+            font-size: 2em;
+        }
+        .chapter-selection {
+            font-size: 2em;
+        }
+        .course-selection {
+            font-size: 2em;
+        }
+        #topic-selection-form, #chapter-selection-form {
+            display: none;
+        }
+        #streak {
+            position: absolute;
+            text-align: left;
+            margin-left: 10px;
+            margin-top: 15px;
+            z-index: 5;
+        }
+        #flaming-icon {
+            position: absolute;
+            top: 0px;
+            left: 47px;
+            z-index: 0;
+        }
+        #streak-num {
+            color: black;
+            font-weight: bold;
+            color: rgb(0, 0, 0);
+        }
+        #button-bar {
+            text-align: center;
+        }
+        #special-characters-sign {
+            font-size: 0.75em;
+        }
+        .char, #shift {
+            font-size: 1.5em;
+        }
+        
+    </style>
+</head>
+<body>
+    <div id="quiz-box" data-current-question="" data-question-array="">
+        <div id="content">
+        <p id="streak">Streak:  <span id="streak-num">0</span></p>
+        <img id="flaming-icon" src="" width="70px">
+        <h1 id="quiz-title">Quiz Mode</h1>
+        <h1 id="question"></h1>
+        <div id="button-bar">
+            <h2 id="special-characters-sign">Special characters:</h2>
+            <button id="shift">shift</button>
+            <button class="shift char">á</button>
+            <button class="shift char">é</button>
+            <button class="shift char">í</button>
+            <button class="shift char">ó</button>
+            <button class="shift char">ú</button>
+            <button class="shift char">ü</button>
+            <button class="shift char">ñ</button>
+            <button class="char">¡</button>
+            <button class="char">¿</button>
+        </div>
+        <form id="form">
+            <label for="answer" class="answer-form" id="label">Your Answer:</label><br>
+            <input type="text" class="answer-form" name="answer">
+            <button type="submit" class="answer-form">Submit</button>
+        </form>
+        <h1 id="result" class="answer-explanation">You got this wrong.</h1>
+        <h2 class="answer-explanation user-answer">You answered:</h2>
+        <h3 class="answer-explanation user-answer" id="user-answer">Answer</h3>
+        <h2 class="answer-explanation correct-answer" id="correct-answer-sign">Correct Answer:</h2>
+        <h3 class="answer-explanation correct-answer" id="correct-answer">Real Answer</h3>
+        <button type="submit" id="next-question">Next Question</button>
+        <br>
+        <button type="submit" id="manual-grading"></button>
+        </div>
+        <div id="selection">
+            <form id="course-selection-form">
+                <fieldset id="course-disable">
+                <label for="course-selection" class="course-selection">Select the course:</label>
+                <br>
+                <select name="course" id="course-selection" class="course-selection" required>
+                    <option value="" disabled selected hidden>Please select an option</option>
+                </select>
+                <br>
+                <button type="submit" class="course-selection">Select</button>
+                </fieldset>
+            </form>
+            <form id="chapter-selection-form">
+                <fieldset id="chapter-disable">
+                <label for="chapter-selection" class="chapter-selection">Select the chapter:</label>
+                <br>
+                <select name="chapter" id="chapter-selection" class="chapter-selection" required>
+                    <option value="" disabled selected hidden>Please select an option</option>
+                </select>
+                <br>
+                <button type="submit" class="chapter-selection">Select</button>
+                </fieldset>
+            </form>
+            <form id="topic-selection-form">
+                <fieldset id="topic-disable">
+                <label for="topic-selection" class="topic-selection">Select the topic:</label>
+                <br>
+                <select name="topic" id="topic-selection" class="topic-selection" required>
+                    <option value="" disabled selected hidden>Please select an option</option>
+                </select>
+                <br>
+                <button type="submit" class="topic-selection">Submit</button>
+                </fieldset>
+            </form>
+    </div>
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+<script>
+    const Chapter1 = {
+  'Greetings & Basics': {
+    'What is "Hello"?': ['hola'],
+    'What is "What is your name? (formal)"?': ['¿cómo se llama usted?'],
+    'What is "What is your name? (informal)"?': ['¿cómo te llamas?'],
+    'What is "My name is..."?': ['me llamo...'],
+    'What is "And you? (formal)"?': ['¿y usted?'],
+    'What is "And you? (informal)"?': ['¿y tú?'],
+    'What is "It\'s a pleasure/Nice to meet you"?': ['mucho gusto'],
+    'What is "The pleasure is mine."?': ['el gusto es mío.'],
+    'What is "name"?': ['el nombre'],
+    'What is "Mr."?': ['el señor'],
+    'What is "Ms., Mrs."?': ['la señora'],
+    'What is "Delighted/Pleased to meet you"?': ['encantado'],
+    'What is "Likewise"?': ['igualmente'],
+    'What is "good morning"?': ['buenos días'],
+    'What is "buenas tardes"?': ['buenas tardes'],
+    'What is "good evening / good night"?': ['buenas noches'],
+    'What is "goodbye"?': ['adiós'],
+    'What is "bye"?': ['chau'],
+    'What is "How are you? (formal)"?': ['¿cómo está usted?'],
+    'What is "How are you? (informal)"?': ['¿cómo estás?'],
+    'What is "What\'s up? / How\'s it going?"?': ['¿qué tal?'],
+    'What is "What\'s new?"?': ['¿qué hay de nuevo?'],
+    'What is "well"?': ['bien'],
+    'What is "very well"?': ['muy bien'],
+    'What is "bad"?': ['mal'],
+    'What is "nothing"?': ['nada'],
+    'What is "so-so"?': ['regular'],
+    'What is "thank you"?': ['gracias']
+  },
+  'Origin & Nationality': {
+    'What is "I am from"?': ['soy de'],
+    'What is "Where are you from? (informal)"?': ['¿de dónde eres?'],
+    'What is "Where are you from? (formal)"?': ['¿de dónde es usted?'],
+    'What is "flag"?': ['la bandera'],
+    'What is "capital city"?': ['la capital'],
+    'What is "nationality"?': ['la nacionalidad'],
+    'What is "country"?': ['el país'],
+    'What is "The United States of America"?': ['los estados unidos de américa', 'los estados unidos', 'los e.e.u.u']
+  },
+  'Numbers': {
+    'What is "one"?': ['uno'],
+    'What is "2 (two)"?': ['dos'],
+    'What is "three"?': ['tres'],
+    'What is "four"?': ['cuatro'],
+    'What is "five"?': ['cinco'],
+    'What is "six"?': ['seis'],
+    'What is "seven"?': ['siete'],
+    'What is "eight"?': ['ocho'],
+    'What is "nine"?': ['nueve'],
+    'What is "ten"?': ['diez'],
+    'What is "eleven"?': ['once'],
+    'What is "twelve"?': ['doce'],
+    'What is "thirteen"?': ['trece'],
+    'What is "fourteen"?': ['catorce'],
+    'What is "fifteen"?': ['quince'],
+    'What is "sixteen"?': ['dieciséis', 'diez y seis'],
+    'What is "seventeen"?': ['diecisiete', 'diez y siete'],
+    'What is "eighteen"?': ['dieciocho', 'diez y ocho'],
+    'What is "nineteen"?': ['diecinueve', 'diez y nueve'],
+    'What is "twenty"?': ['veinte'],
+    'What is "twenty-one"?': ['veintiuno', 'veinte y uno'],
+    'What is "twenty-two"?': ['veintidós', 'veinte y dos'],
+    'What is "twenty-three"?': ['veintitrés', 'veinte y tres'],
+    'What is "twenty-four"?': ['veinticuatro', 'veinte y cuatro'],
+    'What is "twenty-five"?': ['veinticinco', 'veinte y cinco'],
+    'What is "twenty-six"?': ['veintiséis', 'veinte y seis'],
+    'What is "twenty-seven"?': ['veintisiete', 'veinte y siete'],
+    'What is "twenty eight"?': ['veintiocho', 'veinte y ocho'],
+    'What is "twenty-nine"?': ['veintinueve', 'veinte y nueve'],
+    'What is "thirty"?': ['treinta']
+  },
+  'School & Classroom': {
+    'What is "teacher" (male)?': ['el profesor'],
+    'What is "teacher" (female)?': ['la profesora'],
+    'What is "clock"?': ['el reloj'],
+    'What is "students"?': ['los estudiantes'],
+    'What is "book"?': ['el libro'],
+    'What is "blackboard/whiteboard"?': ['la pizarra'],
+    'What is "backpack"?': ['la mochila'],
+    'What is "student desk"?': ['el pupitre'],
+    'What is "chair"?': ['la silla'],
+    'What is "teacher\'s desk"?': ['el escritorio'],
+    'What is "computer"?': ['la computadora'],
+    'What is "pencil"?': ['el lápiz'],
+    'What is "notebook"?': ['el cuaderno'],
+    'What is "pen"?': ['la pluma'],
+    'What is "homework"?': ['la tarea'],
+    'What is "lunch"?': ['el almuerzo']
+  },
+  'School Subjects': {
+    'What is "subjects"?': ['las materias'],
+    'What is "art"?': ['el arte'],
+    'What is "science"?': ['las ciencias'],
+    'What is "Spanish"?': ['el español'],
+    'What is "geography"?': ['la geografía'],
+    'What is "history"?': ['la historia'],
+    'What is "English"?': ['el inglés'],
+    'What is "math"?': ['las matemáticas'],
+    'What is "music"?': ['la música']
+  },
+  'Classroom Phrases': {
+    'What is "How do you say... en español?"?': ['¿cómo se dice... en español?'],
+    'What is "excuse me"?': ['con permiso'],
+    'What is "You\'re welcome"?': ['de nada'],
+    'What is "really?"?': ['¿de verdad?', '¿de veras?'],
+    'What is "What page are we on?"?': ['¿en qué página estamos?'],
+    'What is "More slowly, please"?': ['más despacio, por favor'],
+    'What is "Thank you very much"?': ['muchas gracias'],
+    'What is "I don\'t understand"?': ['no entiendo'],
+    'What is "I don\'t know"?': ['no sé'],
+    'What is "please"?': ['por favor'],
+    'What is "What does ... mean?"?': ['¿qué significa...?'],
+    'What is "I have a question"?': ['tengo una pregunta']
+  },
+  'Miscellaneous Basics': {
+    'What is "girl"?': ['la chica'],
+    'What is "boy"?': ['el chico'],
+    'What is "Which is...?"?': ['¿cuál es...?'],
+    'What is "How many? (for male/mixed groups)"?': ['¿cuántos?'],
+    'What is "How many? (for all-female groups)"?': ['¿cuántas?'],
+    'What is "I study"?': ['estudio'],
+    'What is "you study (informal)"?': ['estudias'],
+    'What is "week"?': ['la semana'],
+    'What is "yesterday"?': ['ayer'],
+    'What is "my"(singular)?': ['mi'],
+    'What is "there is, there are"?': ['hay']
+  }
+};
+    const Chapter2 = {
+  'Classroom People & Objects': {
+    'What is "student" (male)?': ['el estudiante'],
+    'What is "student" (female)?': ['la estudiante'],
+    'What is "teacher" (male)?': ['el profesor'],
+    'What is "teacher" (female)?': ['la profesora'],
+    'What is "eraser"?': ['el borrador'],
+    'What is "desk"?': ['el escritorio'],
+    'What is "book"?': ['el libro'],
+    'What is "map"?': ['el mapa'],
+    'What is "table"?': ['la mesa'],
+    'What is "backpack"?': ['la mochila'],
+    'What is "paper"?': ['el papel'],
+    'What is "wastebasket"?': ['la papelera'],
+    'What is "blackboard"?': ['la pizarra'],
+    'What is "pen"?': ['la pluma', 'el bolígrafo'],
+    'What is "door"?': ['la puerta'],
+    'What is "clock/watch"?': ['el reloj'],
+    'What is "seat"?': ['la silla'],
+    'What is "chalk"?': ['la tiza'],
+    'What is "window"?': ['la ventana'],
+    'What is "school"?': ['la escuela']
+  },
+  'Campus Locations': {
+    'What is "library"?': ['la biblioteca'],
+    'What is "cafeteria"?': ['la cafetería'],
+    'What is "house/home"?': ['la casa'],
+    'What is "stadium"?': ['el estadio'],
+    'What is "laboratory"?': ['el laboratorio'],
+    'What is "bookstore"?': ['la librería'],
+    'What is "university/college"?': ['la universidad']
+  },
+  'School & Schedule': {
+    'What is "class"?': ['la clase'],
+    'What is "course"?': ['el curso'],
+    'What is "test/exam"?': ['el examen'],
+    'What is "schedule"?': ['el horario'],
+    'What is "quiz"?': ['la prueba'],
+    'What is "semester"?': ['el semestre'],
+    'What is "homework"?': ['la tarea'],
+    'What is "trimester"?': ['el trimestre'],
+    'What is "lunch"?': ['el almuerzo']
+  },
+  'Subject Pronouns': {
+    'What is "I"?': ['yo'],
+    'What is "you (informal)"?': ['tú'],
+    'What is "he"?': ['él'],
+    'What is "she"?': ['ella'],
+    'What is "you (formal)"?': ['usted'],
+    'What is "we (male/mixed group)"?': ['nosotros'],
+    'What is "we (all-female group)"?': ['nosotras'],
+    'What is "you all (Spain, male/mixed group)"?': ['vosotros'],
+    'What is "you all (Spain, all-female group)"?': ['vosotras'],
+    'What is "they (male/mixed group)"?': ['ellos'],
+    'What is "they (all-female group)"?': ['ellas'],
+    'What is "you all"?': ['ustedes']
+  },
+  'Academic Subjects': {
+    'What is "art"?': ['el arte'],
+    'What is "biology"?': ['la biología'],
+    'What is "sciences"?': ['las ciencias'],
+    'What is "computer science"?': ['la computación'],
+    'What is "accounting"?': ['la contabilidad'],
+    'What is "economics"?': ['la economía'],
+    'What is "Spanish"?': ['el español'],
+    'What is "physics"?': ['la física'],
+    'What is "geography"?': ['la geografía'],
+    'What is "history"?': ['la historia'],
+    'What is "humanities"?': ['las hubanidades'],
+    'What is "English"?': ['el inglés'],
+    'What is "foreign languages"?': ['las lenguas extranjeras'],
+    'What is "literature"?': ['la literatura'],
+    'What is "mathematics"?': ['las matemáticas'],
+    'What is "music"?': ['la música'],
+    'What is "journalism"?': ['el periodismo'],
+    'What is "psychology"?': ['la psicología'],
+    'What is "chemistry"?': ['la química'],
+    'What is "sociology"?': ['la sociología'],
+    'What is "physical education class"?': ['la educación física']
+  },
+  'Interrogatives & Conjunctions': {
+    'What is "where to?"?': ['¿adónde?'],
+    'What is "which one?"?': ['¿cuál?'],
+    'What is "which ones?"?': ['¿cuáles?'],
+    'What is "why?"?': ['¿por qué?'],
+    'What is "because"?': ['porque']
+  },
+  'AR Verbs': {
+    'What is "to dance"?': ['bailar'],
+    'What is "to look for"?': ['buscar'],
+    'What is "to walk"?': ['caminar'],
+    'What is "to sing"?': ['cantar'],
+    'What is "to have dinner"?': ['cenar'],
+    'What is "to buy"?': ['comprar'],
+    'What is "to answer"?': ['contestar'],
+    'What is "to converse/chat"?': ['conversar'],
+    'What is "to have breakfast"?': ['desayunar'],
+    'What is "to rest"?': ['descansar'],
+    'What is "to wish/desire"?': ['desear'],
+    'What is "to draw"?': ['dibujar'],
+    'What is "to teach"?': ['enseñar'],
+    'What is "to listen"?': ['escuchar'],
+    'What is "to wait for to hope"?': ['esperar'],
+    'What is "to study"?': ['estudiar'],
+    //'What is "to explain"?': ['explicar'],
+    'What is "to like"?': ['gustar'],
+    'What is "to talk/to speak"?': ['hablar'],
+    'What is "to arrive"?': ['llegar'],
+    'What is "to carry"?': ['llevar'],
+    'What is "to look (at)/watch"?': ['mirar'],
+    'What is "to need"?': ['necesitar'],
+    'What is "to practice"?': ['practicar'],
+    'What is "to ask (a question)"?': ['preguntar'],
+    'What is "to prepare"?': ['preparar'],
+    'What is "to return"?': ['regresar'],
+    'What is "to end/finish"?': ['terminar'],
+    'What is "to take/drink"?': ['tomar'],
+    'What is "to work"?': ['trabajar'],
+    'What is "to travel"?': ['viajar']
+  },
+  'Prepositions & Locations': {
+    'What is "to the right of"?': ['a la derecha de'],
+    'What is "to the left of"?': ['a la izquierda de'],
+    'What is "in, on"?': ['en'],
+    'What is "near"?': ['cerca de'],
+    'What is "with"?': ['con'],
+    'What is "below"?': ['debajo de'],
+    'What is "in front of"?': ['delante de'],
+    'What is "behind"?': ['detrás de'],
+    'What is "on top of"?': ['encima de'],
+    'What is "between"?': ['entre'],
+    'What is "far from"?': ['lejos de'],
+    'What is "without"?': ['sin'],
+    'What is "over, about"?': ['sobre'],
+    'What is "next to"?"': ['al lado de']
+  },
+  'Calendar & Days': {
+    'What is "when"?': ['¿cuándo?'],
+    'What is "What day is today?"?': ['¿qué día es hoy?'],
+    'What is "What is the date?"?': ['¿cuál es la fecha?'],
+    'What is "Today is. ."?': ['hoy es...'],
+    'What is "week"?': ['la semana'],
+    'What is "Monday"?': ['lunes'],
+    'What is "Tuesday"?': ['martes'],
+    'What is "Wednesday"?': ['miércoles'],
+    'What is "Thursday"?': ['jueves'],
+    'What is "Friday"?': ['viernes'],
+    'What is "Saturday"?': ['sábado'],
+    'What is "Sunday"?': ['domingo']
+  }
+};
+    const Chapter3 = {
+  'Family Members': {
+    'What is "grandfather"?': ['el abuelo'],
+    'What is "grandmother"?': ['la abuela'],
+    'What is "grandparents"?': ['los abuelos'],
+    'What is "great-grandfather"?': ['el bisabuelo'],
+    'What is "great-grandmother"?': ['la bisabuela'],
+    'What is "brother-in-law"?': ['el cuñado'],
+    'What is "sister-in-law"?': ['la cuñada'],
+    'What is "husband"?': ['el esposo'],
+    'What is "wife"?': ['la esposa'],
+    'What is "family"?': ['la familia'],
+    'What is "brother"?': ['el hermano'],
+    'What is "sister"?': ['la hermana'],
+    'What is "stepmother"?': ['la madrastra'],
+    'What is "mother"?': ['la madre'],
+    'What is "stepfather"?': ['el padrastro'],
+    'What is "father"?': ['el padre'],
+    'What is "parents"?': ['los padres'],
+    'What is "relatives"?': ['los parientes'],
+    'What is "nephew"?': ['el sobrino'],
+    'What is "niece"?': ['la sobrina'],
+    'What is "father-in-law"?': ['el suegro'],
+    'What is "mother-in-law"?': ['la suegra'],
+    'What is "uncle"?': ['el tío'],
+    'What is "aunt"?': ['la tía'],
+    'What is "son-in-law"?': ['el yerno'],
+    'What is "daughter-in-law"?': ['la nuera'],
+    'What is "uncles and aunts"?': ['los tíos'],
+    'What is "cousins"?': ['los primos']
+  },
+  'People & Relationships': {
+    'What is "friend" (male)?': ['el amigo'],
+    'What is "friend" (female)?': ['la amiga'],
+    'What is "people"?': ['la gente'],
+    'What is "person"?': ['la persona'],
+    'What is "last name"?': ['el apellido']
+  },
+  'Professions': {
+    'What is "artist" (male)?': ['el artista'],
+    'What is "artist" (female)?': ['la artista'],
+    'What is "doctor" (médico)?': ['el médico'],
+    'What is "doctor" (médica)?': ['la médica'],
+    'What is "engineer" (male)?': ['el ingeniero'],
+    'What is "engineer" (female)?': ['la ingeniera'],
+    'What is "journalist" (male)?': ['el periodista'],
+    'What is "journalist" (female)?': ['la periodista'],
+    'What is "computer programmer" (male)?': ['el programador'],
+    'What is "computer programmer" (female)?': ['la programadora']
+  },
+  'ER/IR Verbs': {
+    'What is "to have"?': ['tener'],
+    'What is "to come"?': ['venir'],
+    'What is "to learn"?': ['aprender'],
+    'What is "to drink"?': ['beber'],
+    'What is "to describe"?': ['describir'],
+    'What is "to eat"?': ['comer'],
+    'What is "to understand"?': ['comprender'],
+    'What is "to run"?': ['correr'],
+    'What is "to believe in"?': ['creer (en)'],
+    'What is "should / must"?': ['deber'],
+    'What is "to write"?': ['escribir'],
+    'What is "to leer"?': ['leer'],
+    'What is "to receive"?': ['recibir'],
+    'What is "to live"?': ['vivir']
+  },
+  'Descriptive Adjectives': {
+    'What is "tall" (masculine singular)?': ['alto'],
+    'What is "short" (feminine singular)?': ['baja'],
+    'What is "nice; friendly" (masculine plural)?': ['simpáticos'],
+    'What is "good" (feminine singular)?': ['buena'],
+    'What is "intelligent" (singular form)?': ['inteligente'],
+    'What is "hard-working" (feminine singular)?': ['trabajadora'],
+    'What is "important" (singular form)?': ['importante'],
+    'What is "interesting" (singular form)?': ['interesante'],
+    'What is "easy" (singular form)?': ['fácil'],
+    'What is "difficult" (singular form)?': ['difícil'],
+    'What is "same" (masculine plural)?': ['mismos']
+  },
+  'Nationalities': {
+    'What is "German" (feminine plural)?': ['alemanas'],
+    'What is "Argentine" (masculine plural)?': ['argentinos'],
+    'What is "Canadian" (singular form)?': ['canadiense'],
+    'What is "Chinese" (masculine plural)?': ['chinos'],
+    'What is "Costa Rican" (singular form)?': ['costarricense'],
+    'What is "Cuban" (masculine singular)?': ['cubano'],
+    'What is "Ecuadorian" (feminine singular)?': ['ecuatoriana'],
+    'What is "Spanish" (feminine plural)?': ['españolas'],
+    'What is "from the U.S." (singular form)?': ['estadounidense'],
+    'What is "French" (singular form)?': ['francés'],
+    'What is "English" (singular form)?': ['inglés'],
+    'What is "Italian" (masculine plural)?': ['italianos'],
+    'What is "Japanese" (masculine plural)?': ['japoneses'],
+    'What is "Mexican" (masculine singular)?': ['mexicano'],
+    'What is "North American" (feminine singular)?': ['norteamericana'],
+    'What is "Puerto Rican" (feminine plural)?': ['puertorriqueñas'],
+    'What is "Russian" (masculine plural)?': ['rusos']
+  }
+};
+    const data = {
+        "Spanish 1A":{
+            "Lecciones Preliminar & 1":Chapter1,
+            "Lección 2":Chapter2,
+            "Lección 3":Chapter3
+        }
+    }
+    let courseSelected;
+    let chapterSelected;
+    let topicSelected;
+    let answer;
+    let userAnswer;
+    let questionRep;
+    let streak = 0;
+    let oldStreak = 0;
+    let shift = "lowercase"
+    let flamingIconSrc = "flaming-streak-icon.png"
+    const getQuestionArray = function () {
+        const questions = $("#quiz-box").attr("data-question-array");
+        if (questions.length === 0) {
+            return []
+        }
+        return questions.split(",")
+    }
+    const changeQuestionArray = function (array) {
+        $("#quiz-box").attr("data-question-array", array.join())
+    }
+    const getCurrentQuestion = function () {
+        return $("#quiz-box").attr("data-current-question")
+    }
+    const changeCurrentQuestion = function (newQuestion) {
+        return $("#quiz-box").attr("data-current-question", newQuestion)
+    }
+    const refreshStreak = function (newStreak) {
+        $("#streak-num").text(newStreak)
+        if (newStreak >= 5) {
+            $("#flaming-icon").attr("src", flamingIconSrc)
+            $("#streak-num").css("color", "red")
+        } else {
+            $("#flaming-icon").attr("src", "")
+            $("#streak-num").css("color", "black")
+        }
+    }
+    const shuffleArray = function (array){
+        let shuffled = array
+        let j;
+        for (let i = shuffled.length - 1; i > 0; i--) {
+            j = Math.floor(Math.random() * (i + 1));
+            [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]]
+        }
+        return shuffled
+    }
+    const insertChar = function (char) {
+        const domEl = $('[name="answer"]')[0]
+        if ($(domEl).css("display") === "none") {
+            return 0; //If the domEl is hidden why add something to it?
+        }
+        const startPos = domEl.selectionStart
+        const endPos = domEl.selectionEnd
+        const currentVal = $(domEl).val()
+        const newVal = currentVal.slice(0, startPos) + char + currentVal.slice(endPos)
+        $(domEl).val(newVal)
+        domEl.setSelectionRange(startPos + 1, startPos + 1)
+        $(domEl).focus()
+    }
+    const keyboardShortcut = function (event) {
+        //This is the function that makes sure that you can press enter and the next question will trigger.
+        const keyPressed = event.key
+        const keys = ["a", "e", "i", "o", "u", "n", "y", "A", "E", "I", "O", "U", "N", "Y", "!", "?", "q"]
+        if (keys.includes(keyPressed) && event.altKey) {
+            event.preventDefault()
+        }
+        if (event.altKey) {
+            switch (keyPressed) {
+                case "a": insertChar("á"); break;
+                case "e": insertChar("é"); break;
+                case "i": insertChar("í"); break;
+                case "o": insertChar("ó"); break;
+                case "u": insertChar("ú"); break;
+                case "y": insertChar("ü"); break;
+                case "n": insertChar("ñ"); break;
+                case "A": insertChar("Á"); break;
+                case "E": insertChar("É"); break;
+                case "I": insertChar("Í"); break;
+                case "O": insertChar("Ó"); break;
+                case "U": insertChar("Ú"); break;
+                case "Y": insertChar("Ü"); break;
+                case "N": insertChar("Ñ"); break;
+                case "?": insertChar("¿"); break;
+                case "!": insertChar("¡"); break;
+                case "q":
+                    if ($("#form").css("display") === "none") {
+                        //Scenario where the input box isn't there.
+                        $("#next-question").trigger("click")
+                    } else {
+                        //Check the answer, but prevent spamming.
+                        console.log($('[name="answer"]').css("display"))
+                        if ($('[name="answer"]').val()) {
+                            //Uses truthy/falsy because if it is an empty string then don't spam.
+                            $("#form").trigger("submit")
+                        }
+                    }
+                    break;
+            }
+        }
+    }
+    
+    const shiftAll = function () {
+        //So that the user can input uppercase and lowercase special symbols.
+        if ($("#shift").text() === "shift") {
+            //Scenario where we need to uppercase everything.
+            shift = "uppercase"
+            $("#shift").text("SHIFT")
+            $(".shift").each(function (index, element) {
+                $(element).text($(element).text().toUpperCase()) //element is a DOM node
+            })
+        } else {
+            //Scenario where we need to lowercase everything.
+            shift = "lowercase"
+            $("#shift").text("shift")
+            $(".shift").each(function (index, element) {
+                $(element).text($(element).text().toLowerCase()) //element is a DOM node
+            })
+        }
+    }
+    const manualGrading = function (event) {
+        let questionArray = getQuestionArray()
+        let question = getCurrentQuestion()
+        if (event.data.ogResult) { //Event.data is boolean
+            //If it is true then that means that we need to mark it wrong.
+            if (!questionArray.includes(question)) {
+                questionArray.push(question)
+            }
+            questionRep[question] = questionRep[question] + 3 //To account for the one that checkAnswer just subtracted.
+            streak = 0
+            refreshStreak(streak)
+        } else {
+            //We need to mark it correct instead.
+            questionRep[question] = questionRep[question] - 3
+            if (questionRep[question] === 0) {
+                questionArray.pop() //remove the question
+            }
+            streak = oldStreak + 1
+            refreshStreak(streak)
+        }
+        $("#next-question").trigger("click", setUpQuestion)
+    }
+    const checkAnswer = function (event) {
+        event.preventDefault();
+        userAnswer = ($('input[name="answer"]').val()).trim().toLowerCase()
+        answers = data[courseSelected][chapterSelected][topicSelected][getCurrentQuestion()]
+        let $result = $("#result")
+        $("#form").css("display", "none")
+        let questionArray = getQuestionArray()
+        if (answers.includes(userAnswer)) {
+            $result.text("You got this correct!")
+            $result.css("color", "green")
+            $result.css("display", "block")
+            //Okay, now time to modify the question array b/c the user got it right!
+            if (questionRep[getCurrentQuestion()] === 1) {
+                questionArray.shift() //They have completed the required amounts of reps.
+                questionRep[getCurrentQuestion()] = questionRep[getCurrentQuestion()] - 1 //While this is useless mostly, it can help with debugging.
+            } else {
+                questionArray.push(questionArray.shift()) //They have not completed the required reps.
+                questionRep[getCurrentQuestion()] = questionRep[getCurrentQuestion()] - 1 //However, deduct one rep from the total.
+            }
+            streak++
+            refreshStreak(streak)
+            $("#manual-grading").text("I got this wrong")
+            $("#manual-grading").css("color", "red")
+            $("#manual-grading").on("click", {ogResult: true}, manualGrading)
+        } else {
+            if (streak >= 5) {
+                $result.text("You've lost your blazing streak.")
+            } else {
+                $result.text("You got this wrong.")
+            }
+            $result.css("color", "red")
+            streak = 0
+            refreshStreak(streak)
+            $("#user-answer").text(userAnswer)
+            if (answers.length === 1) {
+                $("#correct-answer-sign").text("Correct Answer:")
+                $("#correct-answer").text(answers[0])
+            } else {
+                $("#correct-answer-sign").text("Correct Answers:")
+                $("#correct-answer").text(answers.join(", "))
+            }
+            $(".answer-explanation").css("display", "block")
+            //They got it wrong, so they should answer this question again two more times!
+            questionArray.push(questionArray.shift()) //shift() returns the first element
+            questionRep[getCurrentQuestion()] = questionRep[getCurrentQuestion()] + 2
+            $("#manual-grading").text("I got this correct")
+            $("#manual-grading").css("color", "green")
+            $("#manual-grading").on("click", {ogResult: false}, manualGrading)
+        }
+        changeQuestionArray(questionArray) //Permanently modifies the actual array.
+        $("#next-question").css("display", "inline-block")
+        $("#manual-grading").css("display", "inline-block")
+    }
+    const setUpQuestion = function (event) {
+        //Make the answer explanation and button disappear
+        event.preventDefault()
+        oldStreak = streak
+        $("#next-question").css("display", "none")
+        $("#manual-grading").css("display", "none")
+        $("#manual-grading").off("click")
+        $(".answer-explanation").css("display", "none")
+        //Poof!
+        //Time to set up the next question.
+        const questionArray = getQuestionArray()
+        if (!questionArray[0]) { //If it is an empty string or questionArray is empty, then finish.
+            $("#quiz-title").text("You're done!")
+            $("#question").text("Good job!")
+        } else {
+        const question = questionArray[0]
+        changeCurrentQuestion(question)
+        //Now set up the physical page
+        $("#question").text(question);
+        $("form").css("display", "block");
+        $("[name='answer']").val("");//sets the input box to empty
+        ($('[name="answer"]')[0]).focus();
+        ($('[name="answer"]')[0]).setSelectionRange(0, 0);
+        //Autoselects the input box
+        }
+    }
+    const setUp = function (event) {
+        event.preventDefault()
+        refreshStreak(0)
+        topicSelected = $("#topic-selection").val()
+        $("topic-disable").prop("disabled", true)
+        const questionArray = shuffleArray(Object.keys(data[courseSelected][chapterSelected][topicSelected]))
+        changeQuestionArray(questionArray)
+        $("#selection").css("display", "none")
+        $("#content").css("display", "revert")
+        $('#form').on("submit", checkAnswer)
+        $("#next-question").on("click", setUpQuestion)
+        $("#shift").on("click", shiftAll)
+        const question = questionArray[0]
+        changeCurrentQuestion(question)
+        $("#question").text(question)
+        $("form").css("display", "block")
+        $("[name='answer']").val("");
+        ($('[name="answer"]')[0]).focus();
+        ($('[name="answer"]')[0]).setSelectionRange(0, 0); //autoselect
+        questionRep = {}
+        for (let i = 0; i < questionArray.length; i++) {
+            const question = questionArray[i]
+            questionRep[question] = 3
+        } //Makes sure each question is repeated at least 3 times
+        //Now add an event listener for all members of class char using this keyword.
+        $(document).on("click", ".char", function () {
+                const char = $(this).text()
+                const domEl = $('[name="answer"]')[0]
+                const startPos = domEl.selectionStart
+                const endPos = domEl.selectionEnd
+                const currentVal = $(domEl).val()
+                const newVal = currentVal.slice(0, startPos) + char + currentVal.slice(endPos)
+                $(domEl).val(newVal)
+                domEl.setSelectionRange(startPos + 1, startPos + 1)
+                $(domEl).focus()
+            })
+        //Add some keyboard shortcuts
+        $(document).on("keydown", keyboardShortcut)
+    }
+    const askUserForTopic = function (event) {
+        event.preventDefault()
+        chapterSelected = ($("#chapter-selection")).val()
+        $("#topic-selection-form").css("display", "revert")
+        $("#chapter-disable").prop("disabled", true)
+        $("button.chapter-selection").css("visibility", "hidden")
+        const topics = Object.keys(data[courseSelected][chapterSelected])
+        for (let i = 0; i < topics.length; i++) {
+            const topic = topics[i]
+            const newOption = $(`<option value="${topic}">${topic}</option>`)
+            $("#topic-selection").append(newOption)
+        }
+        $("#topic-selection-form").one("submit", setUp)
+    }
+    const askUserForChapter = function (event) {
+        event.preventDefault()
+        courseSelected = $("#course-selection").val()
+        $("#chapter-selection-form").css("display", "revert")
+        $("#course-disable").prop("disabled", true)
+        $("button.course-selection").css("visibility", "hidden")
+        //The changes above made the course selection freeze. Poof!
+        const chapters = Object.keys(data[courseSelected])
+        for (let i = 0; i < chapters.length; i++) {
+            const chapter = chapters[i]
+            const newOption = $(`<option value="${chapter}">${chapter}</option>`)
+            $("#chapter-selection").append(newOption)
+        }
+        $("#chapter-selection-form").one("submit", askUserForTopic)
+    }
+    const askUserForCourse = function () {
+        $("#content").css("display", "none");
+        //Now fill the course selection with what courses are currently available.
+        const courses = Object.keys(data)
+        for (let i = 0; i < courses.length; i++) {
+            const course = courses[i]
+            const newOption = $(`<option value="${course}">${course}</option>`)
+            $("#course-selection").append(newOption)
+        }
+        //Finally, add an event listener for when the user decides to click.
+        $("#course-selection-form").one("submit", askUserForChapter)
+    }
+    $(document).ready(function() {
+        askUserForCourse()
+    });
+/*
+4. Compliments??????????
+Add reset button also that calls askUserForCourse again.
+5. Work with AI to make better questions(especially el doctor/el medico)#
+*/
+
+
+
+/*Main Psuedocode:
+Step 1: All functions are defined. All predefined, stuff get ready.
+Step 2: The code adds an event listener for when the submit event happens, which then calls the check function.
+Step 3: The check function then checks and shows the results.
+Step 4: When the "next" button is pressed then the setup function sets up the next question, and the cycle repeats.
+Step 5: It always checks if the user has finished the questions and if it has then the script terminates by showing party sign and deletes the form so that the submit event never happens again.
+The current question as well as the array of questions is defined as data-* attribute in the quizbox div.
+
+Subpseudocode for the topic selection.
+Step 1: It asks you for your year(1a, 1b, etc.) An event listener is added for when you finish that.
+Step 2: After you click it, the old event listener is deleted and it now asks you for your chapter. An event listener is there for that.
+Step 3: after you select that, it deletes the old event listener and it now asks for your topic. An event listener is there for that.
+Step 4: Once that happens, the regular content loads.
+
+Subpseudocode for the "I got it correct/wrong" button.
+Step 1: When this button is clicked, a function is called.
+Step 2: It reverses the effect that checkAnswer() did.
+Step 3: It calls setUpQuestion like the generic next button.
+*/
+</script>
+</body>
+</html>
