@@ -98,6 +98,7 @@
             position: absolute;
             left: 10px;
             top: 10px;
+            z-index: 5;
         }
     </style>
 </head>
@@ -568,7 +569,8 @@
     let questionRep;
     let streak = 0;
     let oldStreak = 0;
-    let shift = "lowercase"
+    let shift = "lowercase";
+    const operatingSystem = navigator.userAgentData.platform
     const getQuestionArray = function () {
         const questions = $("#quiz-box").attr("data-question-array");
         if (questions.length === 0) {
@@ -588,10 +590,10 @@
     const refreshStreak = function (newStreak) {
         $("#streak-num").text(newStreak);
         if (newStreak >= 5) {
-            $("#flaming-icon").css("display", "none");
+            $("#flaming-icon").css("display", "inline");
             $("#streak-num").css("color", "red");
         } else {
-            $("#flaming-icon").css("display", "inline");
+            $("#flaming-icon").css("display", "none");
             $("#streak-num").css("color", "black");
         }
     }
@@ -619,42 +621,146 @@
     }
     const keyboardShortcut = function (event) {
         //This is the function that makes sure that you can press enter and the next question will trigger.
-        const keyPressed = event.key
-        const keys = ["a", "e", "i", "o", "u", "n", "y", "A", "E", "I", "O", "U", "N", "Y", "!", "?", "q"]
-        if (keys.includes(keyPressed) && event.altKey) {
-            event.preventDefault()
-        }
-        if (event.altKey) {
-            switch (keyPressed) {
-                case "a": insertChar("á"); break;
-                case "e": insertChar("é"); break;
-                case "i": insertChar("í"); break;
-                case "o": insertChar("ó"); break;
-                case "u": insertChar("ú"); break;
-                case "y": insertChar("ü"); break;
-                case "n": insertChar("ñ"); break;
-                case "A": insertChar("Á"); break;
-                case "E": insertChar("É"); break;
-                case "I": insertChar("Í"); break;
-                case "O": insertChar("Ó"); break;
-                case "U": insertChar("Ú"); break;
-                case "Y": insertChar("Ü"); break;
-                case "N": insertChar("Ñ"); break;
-                case "?": insertChar("¿"); break;
-                case "!": insertChar("¡"); break;
-                case "q":
-                    if ($("#form").css("display") === "none") {
-                        //Scenario where the input box isn't there.
-                        $("#next-question").trigger("click")
-                    } else {
-                        //Check the answer, but prevent spamming.
-                        console.log($('[name="answer"]').css("display"))
-                        if ($('[name="answer"]').val()) {
-                            //Uses truthy/falsy because if it is an empty string then don't spam.
-                            $("#form").trigger("submit")
+        if (operatingSystem === "macOS") {
+            //Entirely different setup for macOS.
+            const keyPressed = event.code
+            console.log(keyPressed)
+            const keys = ["KeyA", "KeyE", "KeyI", "KeyO", "KeyU", "KeyN", "KeyY", "KeyQ"]
+            if ((keys.includes(keyPressed) || (keyPressed === "Digit1" && event.shiftKey) || (keyPressed === "Slash" && event.shiftKey)) && event.altKey){
+                event.preventDefault()
+                const shifted = event.originalEvent.getModifierState("CapsLock") ^ event.shiftKey // ^ is exclusive or operator.
+                switch (keyPressed) {
+                    case "KeyA":
+                        if (shifted) {
+                            insertChar("Á")
+                        } else {
+                            insertChar("á")
                         }
-                    }
-                    break;
+                        break;
+                    case "KeyE":
+                        if (shifted) {
+                            insertChar("É")
+                        } else {
+                            insertChar("é")
+                        }
+                        break;
+                    case "KeyI":
+                        if (shifted) {
+                            insertChar("Í")
+                        } else {
+                            insertChar("í")
+                        }
+                        break;
+                    case "KeyO":
+                        if (shifted) {
+                            insertChar("Ó")
+                        } else {
+                            insertChar("ó")
+                        }
+                        break;
+                    case "KeyU":
+                        if (shifted) {
+                            insertChar("Ú")
+                        } else {
+                            insertChar("ú")
+                        }
+                        break;
+                    case "KeyY":
+                        if (shifted) {
+                            insertChar("Ü")
+                        } else {
+                            insertChar("ü")
+                        }
+                        break;
+                    case "KeyN":
+                        if (shifted) {
+                            insertChar("Ñ")
+                        } else {
+                            insertChar("ñ")
+                        }
+                        break;
+                    case "Slash":
+                        if (event.shiftKey) {
+                            insertChar("¿")
+                        }
+                        break;
+                    case "Digit1":
+                        if (event.shiftKey) {
+                            insertChar("¡")
+                        }
+                        break;
+                    case "KeyQ":
+                        if ($("#form").css("display") === "none") {
+                            //Scenario where the input box isn't there.
+                            $("#next-question").trigger("click")
+                        } else {
+                            //Check the answer, but prevent spamming.
+                            if ($('[name="answer"]').val()) {
+                                //Uses truthy/falsy because if it is an empty string then don't spam.
+                                $("#form").trigger("submit")
+                            }
+                        }
+                        break;
+                    case "KeyM":
+                        if ($("#form").css("display") === "none") {
+                            //It should be grading time.
+                            if ($("#result").css("color") === "rgb(255, 0, 0)") {
+                                //If it is wrong then mark it correct.
+                                $("#manual-grading").trigger("click", {ogResult: false})
+                            } else {
+                                $("#manual-grading").trigger("click", {ogResult: true})
+                            }
+                }
+            }
+
+        } else {
+            const keyPressed = event.key
+            const keys = ["a", "e", "i", "o", "u", "n", "y", "A", "E", "I", "O", "U", "N", "Y", "!", "?", "q"]
+            if (keys.includes(keyPressed) && event.altKey) {
+                event.preventDefault()
+            }
+            if (event.altKey) {
+                switch (keyPressed) {
+                    case "a": insertChar("á"); break;
+                    case "e": insertChar("é"); break;
+                    case "i": insertChar("í"); break;
+                    case "o": insertChar("ó"); break;
+                    case "u": insertChar("ú"); break;
+                    case "y": insertChar("ü"); break;
+                    case "n": insertChar("ñ"); break;
+                    case "A": insertChar("Á"); break;
+                    case "E": insertChar("É"); break;
+                    case "I": insertChar("Í"); break;
+                    case "O": insertChar("Ó"); break;
+                    case "U": insertChar("Ú"); break;
+                    case "Y": insertChar("Ü"); break;
+                    case "N": insertChar("Ñ"); break;
+                    case "?": insertChar("¿"); break;
+                    case "!": insertChar("¡"); break;
+                    case "q":
+                        if ($("#form").css("display") === "none") {
+                            //Scenario where the input box isn't there.
+                            $("#next-question").trigger("click")
+                        } else {
+                            //Check the answer, but prevent spamming.
+                            if ($('[name="answer"]').val()) {
+                                //Uses truthy/falsy because if it is an empty string then don't spam.
+                                $("#form").trigger("submit")
+                            }
+                        }
+                        break;
+                    case "m":
+                        if ($("#form").css("display") === "none") {
+                            //It should be grading time.
+                            if ($("#result").css("color") === "rgb(255, 0, 0)") {
+                                //If it is wrong then mark it correct.
+                                $("#manual-grading").trigger("click", {ogResult: false})
+                            } else {
+                                $("#manual-grading").trigger("click", {ogResult: true})
+                            }
+
+                        }
+                }
             }
         }
     }
