@@ -625,7 +625,7 @@
             //Entirely different setup for macOS.
             const keyPressed = event.code
             console.log(keyPressed)
-            const keys = ["KeyA", "KeyE", "KeyI", "KeyO", "KeyU", "KeyN", "KeyY", "KeyQ"]
+            const keys = ["KeyA", "KeyE", "KeyI", "KeyO", "KeyU", "KeyN", "KeyY", "KeyQ", "KeyM"]
             if ((keys.includes(keyPressed) || (keyPressed === "Digit1" && event.shiftKey) || (keyPressed === "Slash" && event.shiftKey)) && event.altKey){
                 event.preventDefault()
                 const shifted = event.originalEvent.getModifierState("CapsLock") ^ event.shiftKey // ^ is exclusive or operator.
@@ -715,7 +715,7 @@
 
         } else {
             const keyPressed = event.key
-            const keys = ["a", "e", "i", "o", "u", "n", "y", "A", "E", "I", "O", "U", "N", "Y", "!", "?", "q"]
+            const keys = ["a", "e", "i", "o", "u", "n", "y", "A", "E", "I", "O", "U", "N", "Y", "!", "?", "q", "m"]
             if (keys.includes(keyPressed) && event.altKey) {
                 event.preventDefault()
             }
