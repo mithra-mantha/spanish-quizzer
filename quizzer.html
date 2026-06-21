@@ -622,9 +622,8 @@
     const keyboardShortcut = function (event) {
         //This is the function that makes sure that you can press enter and the next question will trigger.
         if (operatingSystem === "macOS") {
-            //Entirely different setup for macOS.
+            //Entirely different setup for macOS. 
             const keyPressed = event.code
-            console.log(keyPressed)
             const keys = ["KeyA", "KeyE", "KeyI", "KeyO", "KeyU", "KeyN", "KeyY", "KeyQ", "KeyM"]
             if ((keys.includes(keyPressed) || (keyPressed === "Digit1" && event.shiftKey) || (keyPressed === "Slash" && event.shiftKey)) && event.altKey){
                 event.preventDefault()
@@ -710,14 +709,14 @@
                             } else {
                                 $("#manual-grading").trigger("click", {ogResult: true})
                             }
-                }
+                        }
             }
-
+            }
         } else {
             const keyPressed = event.key
-            const keys = ["a", "e", "i", "o", "u", "n", "y", "A", "E", "I", "O", "U", "N", "Y", "!", "?", "q", "m"]
+            const keys = ["a", "e", "i", "o", "u", "n", "y", "A", "E", "I", "O", "U", "N", "Y", "!", "?", "q", "m"];
             if (keys.includes(keyPressed) && event.altKey) {
-                event.preventDefault()
+                event.preventDefault();
             }
             if (event.altKey) {
                 switch (keyPressed) {
@@ -740,7 +739,7 @@
                     case "q":
                         if ($("#form").css("display") === "none") {
                             //Scenario where the input box isn't there.
-                            $("#next-question").trigger("click")
+                            $("#next-question").trigger("click");
                         } else {
                             //Check the answer, but prevent spamming.
                             if ($('[name="answer"]').val()) {
@@ -758,12 +757,10 @@
                             } else {
                                 $("#manual-grading").trigger("click", {ogResult: true})
                             }
-
                         }
                 }
             }
         }
-    }
 }
     const shiftAll = function () {
         //So that the user can input uppercase and lowercase special symbols.
