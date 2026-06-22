@@ -623,7 +623,7 @@
         }
         return shuffled
     }
-    const insertChar = function (char) {
+    const insertChar = function (char, deletePrevious=false) {
         const domEl = $('[name="answer"]')[0]
         if ($(domEl).css("display") === "none") {
             return 0; //If the domEl is hidden why add something to it?
@@ -631,9 +631,13 @@
         const startPos = domEl.selectionStart
         const endPos = domEl.selectionEnd
         const currentVal = $(domEl).val()
-        const newVal = currentVal.slice(0, startPos) + char + currentVal.slice(endPos)
+        const newVal = currentVal.slice(0, deletePrevious ? startPos - 1 : startPos) + char + currentVal.slice(endPos)
         $(domEl).val(newVal)
-        domEl.setSelectionRange(startPos + 1, startPos + 1)
+        if (deletePrevious) {
+            domEl.setSelectionRange(startPos, startPos)
+        } else {
+            domEl.setSelectionRange(startPos + 1, startPos + 1)
+        }
         $(domEl).focus()
     }
     const keyboardShortcut = function (event) {
@@ -657,14 +661,14 @@
                         if (shifted) {
                             insertChar("É")
                         } else {
-                            insertChar("é")
+                            insertChar("é", true)
                         }
                         break;
                     case "KeyI":
                         if (shifted) {
                             insertChar("Í")
                         } else {
-                            insertChar("í")
+                            insertChar("í", true)
                         }
                         break;
                     case "KeyO":
@@ -678,7 +682,7 @@
                         if (shifted) {
                             insertChar("Ú")
                         } else {
-                            insertChar("ú")
+                            insertChar("ú", true)
                         }
                         break;
                     case "KeyY":
@@ -692,7 +696,7 @@
                         if (shifted) {
                             insertChar("Ñ")
                         } else {
-                            insertChar("ñ")
+                            insertChar("ñ", true)
                         }
                         break;
                     case "Slash":
