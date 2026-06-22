@@ -570,7 +570,11 @@
     let streak = 0;
     let oldStreak = 0;
     let shift = "lowercase";
-    const operatingSystem = navigator.userAgentData.platform
+    if (navigator.platform.includes("MacIntel")) {
+        const operatingSystem = "macOS"
+    } else {
+        const operatingSystem = ""
+    }
     const getQuestionArray = function () {
         const questions = $("#quiz-box").attr("data-question-array");
         if (questions.length === 0) {
@@ -885,7 +889,7 @@
         event.preventDefault()
         refreshStreak(0)
         topicSelected = $("#topic-selection").val()
-        $("topic-disable").prop("disabled", true)
+        $("#topic-disable").prop("disabled", true)
         const questionArray = shuffleArray(Object.keys(data[courseSelected][chapterSelected][topicSelected]))
         changeQuestionArray(questionArray)
         $("#selection").css("display", "none")
@@ -967,7 +971,6 @@
 /*
 4. Compliments??????????
 Add reset button also that calls askUserForCourse again.
-5. Work with AI to make better questions(especially el doctor/el medico)#
 */
 
 
