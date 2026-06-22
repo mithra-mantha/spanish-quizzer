@@ -648,7 +648,7 @@
             const keys = ["KeyA", "KeyE", "KeyI", "KeyO", "KeyU", "KeyN", "KeyY", "KeyQ", "KeyM"]
             if ((keys.includes(keyPressed) || (keyPressed === "Digit1" && event.shiftKey) || (keyPressed === "Slash" && event.shiftKey)) && event.altKey){
                 event.preventDefault()
-                const shifted = event.originalEvent.getModifierState("CapsLock") ^ event.shiftKey // ^ is exclusive or operator.
+                const shifted = Boolean(event.originalEvent.getModifierState("CapsLock") ^ event.shiftKey) // ^ is bitwise exclusive or operator. Since it returns 0 or 1, you have to use Boolean() on it.
                 switch (keyPressed) {
                     case "KeyA":
                         if (shifted) {
