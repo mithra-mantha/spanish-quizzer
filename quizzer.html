@@ -570,10 +570,11 @@
     let streak = 0;
     let oldStreak = 0;
     let shift = "lowercase";
+    let operatingSystem;
     if (navigator.platform.includes("MacIntel")) {
-        const operatingSystem = "macOS"
+        operatingSystem = "macOS"
     } else {
-        const operatingSystem = ""
+        operatingSystem = ""
     }
     const getQuestionArray = function () {
         const questions = $("#quiz-box").attr("data-question-array");
