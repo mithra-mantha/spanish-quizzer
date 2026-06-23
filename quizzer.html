@@ -100,6 +100,9 @@
             top: 10px;
             z-index: 5;
         }
+        #link-to-home:hover {
+            cursor: pointer;
+        }
         #confetti {
             display: none;
         }
@@ -115,10 +118,17 @@
             background-color: rgb(191, 191, 191);
             cursor: pointer;
         }
+        #reset {
+            position: absolute;
+            right: 20px;
+            top: 20px;
+            z-index: 6;
+        }
     </style>
 </head>
 <body>
     <a id="link-to-home" href="index.html"><img src="Spanish Quizzer logo.png" width="50px" alt="Spanish quizzer logo"></a>
+    <button id="reset">Reset ⟳</button>
     <div id="quiz-box" data-current-question="" data-question-array="">
         <div id="content">
         <p id="streak">Streak:  <span id="streak-num">0</span></p>
@@ -944,14 +954,45 @@ const streakLossFeedback = [
             refreshStreak(streak)
         }
         changeQuestionArray(questionArray)
-        console.log(questionRep, getQuestionArray())
         $("#next-question").trigger("click")
+    }
+    const reset = function () {
+        $("*").removeAttr("style");
+        $("#course-disable").prop("disabled", false);
+        $("#chapter-disable").prop("disabled", false);
+        $("#topic-disable").prop("disabled", false);
+        $("#course-selection").empty();
+        $("#chapter-selection").empty();
+        $("#topic-selection").empty();
+
+        //Remove all event listeners.
+        $("button").each(function (index, element) {
+            $(element).off();
+        });
+        $(document).off("keydown", keyboardShortcut)
+        $("#reset").on("click", resetButton) //Don't destroy the event listener for resetButton!!!
+
+        // Make sure to add the default required element though.
+        $("#course-selection").append("<option value='' disabled selected hidden>Please select an option</option>");
+        $("#chapter-selection").append("<option value='' disabled selected hidden>Please select an option</option>");
+        $("#topic-selection").append("<option value='' disabled selected hidden>Please select an option</option>");
+        askUserForCourse()
+    }
+    const resetButton = function () {
+        if (!getQuestionArray()[0] || $("#content").css("display") === "none") {
+            reset()
+            return 0;
+        }
+        const confirmReset = confirm("Are you sure you want to reset? Your progress will be lost.")
+        if (confirmReset) {
+            reset()
+            return 0;
+        }
     }
     const checkAnswer = function (event) {
         event.preventDefault();
         userAnswer = ($('input[name="answer"]').val()).trim().toLowerCase()
         answers = data[courseSelected][chapterSelected][topicSelected][getCurrentQuestion()];
-        console.log(answers, getCurrentQuestion())
         let $result = $("#result");
         $("#form").css("display", "none");
         let questionArray = getQuestionArray();
@@ -1047,9 +1088,11 @@ const streakLossFeedback = [
         changeQuestionArray(questionArray)
         $("#selection").css("display", "none")
         $("#content").css("display", "revert")
+        
         $('#form').on("submit", checkAnswer)
         $("#next-question").on("click", setUpQuestion)
-        $("#shift").on("click", shiftAll)
+        $("#shift").on("click", shiftAll);
+
         const question = questionArray[0]
         changeCurrentQuestion(question)
         $("#question").text(question)
@@ -1057,12 +1100,14 @@ const streakLossFeedback = [
         $("[name='answer']").val("");
         ($('[name="answer"]')[0]).focus();
         ($('[name="answer"]')[0]).setSelectionRange(0, 0); //autoselect
+
         questionRep = {}
         for (let i = 0; i < questionArray.length; i++) {
             const question = questionArray[i]
             questionRep[question] = 3
         } //Makes sure each question is repeated at least 3 times
         //Now add an event listener for all members of class char using this keyword.
+
         $(document).on("click", ".char", function () {
                 const char = $(this).text()
                 const domEl = $('[name="answer"]')[0]
@@ -1119,6 +1164,7 @@ const streakLossFeedback = [
         $("#course-selection-form").one("submit", askUserForChapter)
     }
     $(document).ready(function() {
+        $("#reset").on("click", resetButton)
         askUserForCourse()
     });
 /*
