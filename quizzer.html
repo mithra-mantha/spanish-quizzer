@@ -725,10 +725,10 @@ const streakLossFeedback = [
         if (questions.length === 0) {
             return []
         }
-        return questions.split(",")
+        return questions.split(",,,")
     }
     const changeQuestionArray = function (array) {
-        $("#quiz-box").attr("data-question-array", array.join());
+        $("#quiz-box").attr("data-question-array", array.join(",,,"));
     }
     const getCurrentQuestion = function () {
         return $("#quiz-box").attr("data-current-question")
