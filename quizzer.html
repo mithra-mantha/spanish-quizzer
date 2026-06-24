@@ -161,7 +161,7 @@
         <h3 class="answer-explanation correct-answer" id="correct-answer">Real Answer</h3>
         <button type="submit" id="next-question">Next Question</button>
         <br>
-        <button type="submit" id="manual-grading"></button>
+        <button type="button" id="manual-grading"></button>
         </div>
         <div id="selection">
             <form id="course-selection-form">
@@ -745,6 +745,7 @@ const streakLossFeedback = [
             $("#flaming-icon").css("display", "none");
             $("#streak-num").css("color", "black");
         }
+        streak = newStreak
     }
     const shuffleArray = function (array){
         let shuffled = array
@@ -950,11 +951,11 @@ const streakLossFeedback = [
             if (questionRep[question] <= 0) {
                 questionArray.pop() //remove the question
             }
-            streak = oldStreak + 1
-            refreshStreak(streak)
+            streak = oldStreak + 1;
+            refreshStreak(streak);
         }
-        changeQuestionArray(questionArray)
-        $("#next-question").trigger("click")
+        changeQuestionArray(questionArray);
+        $("#next-question").trigger("click");
     }
     const reset = function () {
         $("*").removeAttr("style");
@@ -964,22 +965,30 @@ const streakLossFeedback = [
         $("#course-selection").empty();
         $("#chapter-selection").empty();
         $("#topic-selection").empty();
-
+        refreshStreak(0);
+        //Reset all variables.
+        streak = 0;
+        oldStreak = 0;
+        courseSelected = "";
+        chapterSelected = "";
+        topicSelected = "";
+        answer = "";
+        userAnswer = "";
+        questionRep = {};
         //Remove all event listeners.
         $("button").each(function (index, element) {
             $(element).off();
         });
-        $(document).off("keydown", keyboardShortcut)
-        $("#manual-grading").off()
-        $("#next-question").off()
-        $("button.answer-form").off()
-        $("#reset").on("click", resetButton) //Don't destroy the event listener for resetButton!!!
+        $(document).off("keydown");
+        $(document).off("click")
+        $("*").off() ///Just in case destroys any remaining event listeners.
+        $("#reset").on("click", resetButton); //Don't destroy the event listener for resetButton!!!
 
         // Make sure to add the default required element though.
         $("#course-selection").append("<option value='' disabled selected hidden>Please select an option</option>");
         $("#chapter-selection").append("<option value='' disabled selected hidden>Please select an option</option>");
         $("#topic-selection").append("<option value='' disabled selected hidden>Please select an option</option>");
-        askUserForCourse()
+        askUserForCourse();
     }
     const resetButton = function () {
         if (!getQuestionArray()[0] || $("#content").css("display") === "none") {
