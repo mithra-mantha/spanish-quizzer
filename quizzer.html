@@ -942,9 +942,9 @@ const streakLossFeedback = [
         if ($("#content").css("display") === "none") {
             localStorage.setItem("state", "selection")
         } else if ($("#form").css("display") === "none") {
-            localStorage.setItem("state", "question")
-        } else {
             localStorage.setItem("state", "answer")
+        } else {
+            localStorage.setItem("state", "question")
         }
         localStorage.setItem("courseSelected", JSON.stringify(courseSelected))
         localStorage.setItem("chapterSelected", JSON.stringify(chapterSelected))
@@ -1162,9 +1162,11 @@ const streakLossFeedback = [
         //Autoselects the input box
         }
     }
-    const setUp = function (event) {
-        event.preventDefault()
-        refreshStreak(0)
+    const setUp = function (event={}) {
+        if (event && (Object.keys(event).length === 0) && event.constructor === Object) {
+        event.preventDefault();
+        };
+        refreshStreak(0);
         topicSelected = $("#topic-selection").val()
         $("#topic-disable").prop("disabled", true)
         const questionArray = shuffleArray(Object.keys(data[courseSelected][chapterSelected][topicSelected]))
@@ -1233,7 +1235,7 @@ const streakLossFeedback = [
             const newOption = $(`<option value="${chapter}">${chapter}</option>`)
             $("#chapter-selection").append(newOption)
         }
-        storeInLocalStorage()
+        storeInLocalStorage();
         $("#chapter-selection-form").one("submit", askUserForTopic)
     }
     const askUserForCourse = function () {
@@ -1278,6 +1280,13 @@ Subpseudocode for the "I got it correct/wrong" button.
 Step 1: When this button is clicked, a function is called.
 Step 2: It reverses the effect that checkAnswer() did.
 Step 3: It calls setUpQuestion like the generic next button.
+
+Subpseudocode for the localStorage part:
+Step 1: If the user was still selecting their course/chapter/topic, run normally.
+Step 2: Otherwise, delete the forms, run setUp() and reassign variables.
+Step 3: Depending on their state-
+    Question: Proceed as normal.
+    Answer: Make the question disappear and trigger checkAnswer().
 */
 </script>
 </body>
