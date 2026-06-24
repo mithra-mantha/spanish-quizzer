@@ -708,8 +708,8 @@ const streakLossFeedback = [
     let courseSelected;
     let chapterSelected;
     let topicSelected;
-    let answer;
     let userAnswer;
+    let answers;
     let questionRep;
     let streak = 0;
     let oldStreak = 0;
@@ -938,6 +938,48 @@ const streakLossFeedback = [
             }
         }
 }
+    const storeInLocalStorage = function () {
+        if ($("#content").css("display") === "none") {
+            localStorage.setItem("state", "selection")
+        } else if ($("#form").css("display") === "none") {
+            localStorage.setItem("state", "question")
+        } else {
+            localStorage.setItem("state", "answer")
+        }
+        localStorage.setItem("courseSelected", JSON.stringify(courseSelected))
+        localStorage.setItem("chapterSelected", JSON.stringify(chapterSelected))
+        localStorage.setItem("topicSelected", JSON.stringify(topicSelected))
+        localStorage.setItem("answers", JSON.stringify(answers))
+        localStorage.setItem("userAnswer", JSON.stringify(userAnswer))
+        localStorage.setItem("questionRep", JSON.stringify(questionRep))
+        localStorage.setItem("streak", JSON.stringify(streak))
+        localStorage.setItem("oldStreak", JSON.stringify(oldStreak))
+        //This stores EVERYTHING in localstorage, useful or not.
+    }
+    const getLocalStorage = function () {
+        return {
+            "state":localStorage.getItem("state"),
+            "courseSelected":JSON.parse(localStorage.getItem("courseSelected")),
+            "chapterSelected":JSON.parse(localStorage.getItem("chapterSelected")),
+            "topicSelected":JSON.parse(localStorage.getItem("topicSelected")),
+            "answers":JSON.parse(localStorage.getItem("answers")),
+            "userAnswer":JSON.parse(localStorage.getItem("userAnswer")),
+            "questionRep":JSON.parse(localStorage.getItem("questionRep")),
+            "streak":JSON.parse(localStorage.getItem("streak")),
+            "oldStreak":JSON.parse(localStorage.getItem("oldStreak")),
+        }
+    }
+    const deleteLocalStorage = function () {
+        localStorage.removeItem("state")
+        localStorage.removeItem("courseSelected")
+        localStorage.removeItem("chapterSelected")
+        localStorage.removeItem("topicSelected")
+        localStorage.removeItem("answers")
+        localStorage.removeItem("userAnswer")
+        localStorage.removeItem("questionRep")
+        localStorage.removeItem("streak")
+        localStorage.removeItem("oldStreak")
+    }
     const shiftAll = function () {
         //So that the user can input uppercase and lowercase special symbols.
         if ($("#shift").text() === "shift") {
@@ -1005,7 +1047,8 @@ const streakLossFeedback = [
         $(document).off("click")
         $("*").off() ///Just in case destroys any remaining event listeners.
         $("#reset").on("click", resetButton); //Don't destroy the event listener for resetButton!!!
-
+        //Clear localStorage.
+        deleteLocalStorage()
         // Make sure to add the default required element though.
         $("#course-selection").append("<option value='' disabled selected hidden>Please select an option</option>");
         $("#chapter-selection").append("<option value='' disabled selected hidden>Please select an option</option>");
@@ -1077,6 +1120,7 @@ const streakLossFeedback = [
             $("#manual-grading").on("click", {ogResult: false}, manualGrading)
         }
         changeQuestionArray(questionArray) //Permanently modifies the actual array.
+        storeInLocalStorage()
         $("#next-question").css("display", "inline-block")
         $("#manual-grading").css("display", "inline-block")
     }
@@ -1110,10 +1154,11 @@ const streakLossFeedback = [
         changeCurrentQuestion(question)
         //Now set up the physical page
         $("#question").text(question);
-        $("form").css("display", "block");
+        $("#form").css("display", "block");
         $("[name='answer']").val("");//sets the input box to empty
         ($('[name="answer"]')[0]).focus();
         ($('[name="answer"]')[0]).setSelectionRange(0, 0);
+        storeInLocalStorage()
         //Autoselects the input box
         }
     }
@@ -1138,7 +1183,6 @@ const streakLossFeedback = [
         $("[name='answer']").val("");
         ($('[name="answer"]')[0]).focus();
         ($('[name="answer"]')[0]).setSelectionRange(0, 0); //autoselect
-
         questionRep = {}
         for (let i = 0; i < questionArray.length; i++) {
             const question = questionArray[i]
@@ -1158,6 +1202,7 @@ const streakLossFeedback = [
                 $(domEl).focus()
             })
         //Add some keyboard shortcuts
+        storeInLocalStorage()
         $(document).on("keydown", keyboardShortcut)
     }
     const askUserForTopic = function (event) {
@@ -1172,6 +1217,7 @@ const streakLossFeedback = [
             const newOption = $(`<option value="${topic}">${topic}</option>`)
             $("#topic-selection").append(newOption)
         }
+        storeInLocalStorage()
         $("#topic-selection-form").one("submit", setUp)
     }
     const askUserForChapter = function (event) {
@@ -1187,6 +1233,7 @@ const streakLossFeedback = [
             const newOption = $(`<option value="${chapter}">${chapter}</option>`)
             $("#chapter-selection").append(newOption)
         }
+        storeInLocalStorage()
         $("#chapter-selection-form").one("submit", askUserForTopic)
     }
     const askUserForCourse = function () {
@@ -1199,6 +1246,7 @@ const streakLossFeedback = [
             $("#course-selection").append(newOption)
         }
         //Finally, add an event listener for when the user decides to click.
+        storeInLocalStorage()
         $("#course-selection-form").one("submit", askUserForChapter)
     }
     $(document).ready(function() {
