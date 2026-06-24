@@ -759,23 +759,24 @@ const streakLossFeedback = [
     const processAnswer = function (answer) {
         answer = answer.toLowerCase()
 
-        answer.replaceAll(" ", "") //Removes all spaces.
+        answer = answer.replaceAll(" ", "") //Removes all spaces.
 
         //Remove all other weird symbols.
-        answer.replaceAll("[", "")
-        answer.replaceAll("]", "")
-        answer.replaceAll(":", "")
-        answer.replaceAll(";", "")
-        answer.replaceAll("{", "")
-        answer.replaceAll("}", "")
-        answer.replaceAll(",", "")
-        answer.replaceAll(".", "")
-        answer.replaceAll("\\", "")
-        answer.replaceAll("/", "")
-        answer.replaceAll(")", "")
-        answer.replaceAll("(", "")
-        answer.replaceAll("|", "")
-        answer.replaceAll("$", "")
+        answer = answer.replaceAll("[", "")
+        answer = answer.replaceAll("]", "")
+        answer = answer.replaceAll(":", "")
+        answer = answer.replaceAll(";", "")
+        answer = answer.replaceAll("{", "")
+        answer = answer.replaceAll("}", "")
+        answer = answer.replaceAll(",", "")
+        answer = answer.replaceAll(".", "")
+        answer = answer.replaceAll("\\", "")
+        answer = answer.replaceAll("/", "")
+        answer = answer.replaceAll(")", "")
+        answer = answer.replaceAll("(", "")
+        answer = answer.replaceAll("|", "")
+        answer = answer.replaceAll("$", "")
+        return answer
     }
     const insertChar = function (char, deletePrevious=false) {
         const domEl = $('[name="answer"]')[0]
