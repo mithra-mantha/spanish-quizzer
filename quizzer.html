@@ -756,6 +756,27 @@ const streakLossFeedback = [
         }
         return shuffled
     }
+    const processAnswer = function (answer) {
+        answer = answer.toLowerCase()
+
+        answer.replaceAll(" ", "") //Removes all spaces.
+
+        //Remove all other weird symbols.
+        answer.replaceAll("[", "")
+        answer.replaceAll("]", "")
+        answer.replaceAll(":", "")
+        answer.replaceAll(";", "")
+        answer.replaceAll("{", "")
+        answer.replaceAll("}", "")
+        answer.replaceAll(",", "")
+        answer.replaceAll(".", "")
+        answer.replaceAll("\\", "")
+        answer.replaceAll("/", "")
+        answer.replaceAll(")", "")
+        answer.replaceAll("(", "")
+        answer.replaceAll("|", "")
+        answer.replaceAll("$", "")
+    }
     const insertChar = function (char, deletePrevious=false) {
         const domEl = $('[name="answer"]')[0]
         if ($(domEl).css("display") === "none") {
@@ -1008,7 +1029,11 @@ const streakLossFeedback = [
         let $result = $("#result");
         $("#form").css("display", "none");
         let questionArray = getQuestionArray();
-        if (answers.includes(userAnswer)) {
+        let processedAnswers = []
+        for (let i = 0; i < answers.length; i++) {
+            processedAnswers.push(processAnswer(answers[i]))
+        }
+        if (processedAnswers.includes(processAnswer(userAnswer))) {
             $result.text(correctFeedback[Math.floor(Math.random() * correctFeedback.length)]);
             $result.css("color", "green")
             $result.css("display", "block")
