@@ -203,8 +203,8 @@
     const Chapter1 = {
   'Greetings & Basics': {
     'What is "Hello"?': ['hola'],
-    'What is "What is your name? (formal)"?': ['¿cómo se llama usted?'],
-    'What is "What is your name? (informal)"?': ['¿cómo te llamas?'],
+    'What is "What is your name? (formal)"?': ['¿cómo se llama usted?', '¿qué es su nombre?'],
+    'What is "What is your name? (informal)"?': ['¿cómo te llamas?', '¿qué es tu nombre?'],
     'What is "My name is..."?': ['me llamo...'],
     'What is "And you? (formal)"?': ['¿y usted?'],
     'What is "And you? (informal)"?': ['¿y tú?'],
@@ -705,20 +705,18 @@ const streakLossFeedback = [
   "Your lucky run is finished!",
   "That mistake breaks your momentum!"
 ];
-    let courseSelected;
-    let chapterSelected;
-    let topicSelected;
-    let userAnswer;
-    let answers;
-    let questionRep;
+    let courseSelected = ""
+    let chapterSelected = ""
+    let topicSelected = ""
+    let userAnswer = ""
+    let answers = []
+    let questionRep = {}
     let streak = 0;
     let oldStreak = 0;
     let shift = "lowercase";
-    let operatingSystem;
+    let operatingSystem = ""
     if (navigator.platform.includes("MacIntel")) {
         operatingSystem = "macOS"
-    } else {
-        operatingSystem = ""
     }
     const getQuestionArray = function () {
         const questions = $("#quiz-box").attr("data-question-array");
@@ -946,39 +944,35 @@ const streakLossFeedback = [
         } else {
             localStorage.setItem("state", "question")
         }
-        localStorage.setItem("courseSelected", JSON.stringify(courseSelected))
-        localStorage.setItem("chapterSelected", JSON.stringify(chapterSelected))
-        localStorage.setItem("topicSelected", JSON.stringify(topicSelected))
+        localStorage.setItem("courseSelected", courseSelected)
+        localStorage.setItem("chapterSelected", chapterSelected)
+        localStorage.setItem("topicSelected", topicSelected)
         localStorage.setItem("answers", JSON.stringify(answers))
-        localStorage.setItem("userAnswer", JSON.stringify(userAnswer))
+        localStorage.setItem("userAnswer", userAnswer)
         localStorage.setItem("questionRep", JSON.stringify(questionRep))
         localStorage.setItem("streak", JSON.stringify(streak))
         localStorage.setItem("oldStreak", JSON.stringify(oldStreak))
+        localStorage.setItem("currentQuestion", getCurrentQuestion())
+        localStorage.setItem("questionArray", JSON.stringify(getQuestionArray()))
         //This stores EVERYTHING in localstorage, useful or not.
     }
     const getLocalStorage = function () {
         return {
             "state":localStorage.getItem("state"),
-            "courseSelected":JSON.parse(localStorage.getItem("courseSelected")),
-            "chapterSelected":JSON.parse(localStorage.getItem("chapterSelected")),
-            "topicSelected":JSON.parse(localStorage.getItem("topicSelected")),
+            "courseSelected":localStorage.getItem("courseSelected"),
+            "chapterSelected":localStorage.getItem("chapterSelected"),
+            "topicSelected":localStorage.getItem("topicSelected"),
             "answers":JSON.parse(localStorage.getItem("answers")),
-            "userAnswer":JSON.parse(localStorage.getItem("userAnswer")),
+            "userAnswer":localStorage.getItem("userAnswer"),
             "questionRep":JSON.parse(localStorage.getItem("questionRep")),
             "streak":JSON.parse(localStorage.getItem("streak")),
             "oldStreak":JSON.parse(localStorage.getItem("oldStreak")),
+            "currentQuestion":localStorage.getItem("currentQuestion"),
+            "questionArray":JSON.parse(localStorage.getItem("questionArray"))
         }
     }
     const deleteLocalStorage = function () {
-        localStorage.removeItem("state")
-        localStorage.removeItem("courseSelected")
-        localStorage.removeItem("chapterSelected")
-        localStorage.removeItem("topicSelected")
-        localStorage.removeItem("answers")
-        localStorage.removeItem("userAnswer")
-        localStorage.removeItem("questionRep")
-        localStorage.removeItem("streak")
-        localStorage.removeItem("oldStreak")
+        localStorage.clear()
     }
     const shiftAll = function () {
         //So that the user can input uppercase and lowercase special symbols.
@@ -1066,8 +1060,10 @@ const streakLossFeedback = [
             return 0;
         }
     }
-    const checkAnswer = function (event) {
-        event.preventDefault();
+    const checkAnswer = function (event={}) {
+        if (Object.keys(event).length !== 0) {
+            event.preventDefault();
+        };
         userAnswer = ($('input[name="answer"]').val()).trim().toLowerCase()
         answers = data[courseSelected][chapterSelected][topicSelected][getCurrentQuestion()];
         let $result = $("#result");
@@ -1120,13 +1116,15 @@ const streakLossFeedback = [
             $("#manual-grading").on("click", {ogResult: false}, manualGrading)
         }
         changeQuestionArray(questionArray) //Permanently modifies the actual array.
-        storeInLocalStorage()
         $("#next-question").css("display", "inline-block")
         $("#manual-grading").css("display", "inline-block")
+        storeInLocalStorage()
     }
-    const setUpQuestion = function (event) {
+    const setUpQuestion = function (event={}) {
         //Make the answer explanation and button disappear
-        event.preventDefault()
+        if (Object.keys(event).length !== 0) {
+            event.preventDefault();
+        };
         oldStreak = streak
         $("#next-question").css("display", "none")
         $("#manual-grading").css("display", "none")
@@ -1146,7 +1144,7 @@ const streakLossFeedback = [
                 $("#confetti").css("display", "none")
             }, 2000)
             setTimeout(function () {
-                window.location.href = "index.html"
+                reset()
             }, 8000)
 
         } else {
@@ -1158,16 +1156,14 @@ const streakLossFeedback = [
         $("[name='answer']").val("");//sets the input box to empty
         ($('[name="answer"]')[0]).focus();
         ($('[name="answer"]')[0]).setSelectionRange(0, 0);
-        storeInLocalStorage()
         //Autoselects the input box
         }
+        storeInLocalStorage()
     }
-    const setUp = function (event={}) {
-        if (event && (Object.keys(event).length === 0) && event.constructor === Object) {
+    const setUp = function (event) {
         event.preventDefault();
-        };
-        refreshStreak(0);
         topicSelected = $("#topic-selection").val()
+        refreshStreak(0);
         $("#topic-disable").prop("disabled", true)
         const questionArray = shuffleArray(Object.keys(data[courseSelected][chapterSelected][topicSelected]))
         changeQuestionArray(questionArray)
@@ -1204,12 +1200,13 @@ const streakLossFeedback = [
                 $(domEl).focus()
             })
         //Add some keyboard shortcuts
-        storeInLocalStorage()
         $(document).on("keydown", keyboardShortcut)
+        storeInLocalStorage();
     }
     const askUserForTopic = function (event) {
         event.preventDefault()
         chapterSelected = ($("#chapter-selection")).val()
+        storeInLocalStorage()
         $("#topic-selection-form").css("display", "revert")
         $("#chapter-disable").prop("disabled", true)
         $("button.chapter-selection").css("visibility", "hidden")
@@ -1219,12 +1216,12 @@ const streakLossFeedback = [
             const newOption = $(`<option value="${topic}">${topic}</option>`)
             $("#topic-selection").append(newOption)
         }
-        storeInLocalStorage()
         $("#topic-selection-form").one("submit", setUp)
     }
     const askUserForChapter = function (event) {
         event.preventDefault()
         courseSelected = $("#course-selection").val()
+        storeInLocalStorage()
         $("#chapter-selection-form").css("display", "revert")
         $("#course-disable").prop("disabled", true)
         $("button.course-selection").css("visibility", "hidden")
@@ -1235,11 +1232,11 @@ const streakLossFeedback = [
             const newOption = $(`<option value="${chapter}">${chapter}</option>`)
             $("#chapter-selection").append(newOption)
         }
-        storeInLocalStorage();
         $("#chapter-selection-form").one("submit", askUserForTopic)
     }
     const askUserForCourse = function () {
         $("#content").css("display", "none");
+        storeInLocalStorage()
         //Now fill the course selection with what courses are currently available.
         const courses = Object.keys(data)
         for (let i = 0; i < courses.length; i++) {
@@ -1248,12 +1245,95 @@ const streakLossFeedback = [
             $("#course-selection").append(newOption)
         }
         //Finally, add an event listener for when the user decides to click.
-        storeInLocalStorage()
         $("#course-selection-form").one("submit", askUserForChapter)
     }
     $(document).ready(function() {
+        console.log(localStorage)
         $("#reset").on("click", resetButton)
-        askUserForCourse()
+        const state = localStorage.getItem("state")
+        if (state === "selection" || state == null) {
+            askUserForCourse()
+            return;
+        } else {
+            const localStorageData = getLocalStorage()
+            courseSelected = localStorageData.courseSelected;
+            chapterSelected = localStorageData.chapterSelected
+            topicSelected = localStorageData.topicSelected
+            userAnswer = localStorageData.userAnswer
+            answers = localStorageData.answers
+            questionRep = localStorageData.questionRep
+            streak = localStorageData.streak
+            oldStreak = localStorageData.oldStreak
+            $("#content").css("display", "revert");
+            $("#selection").css("display", "none")
+            changeCurrentQuestion(localStorageData.currentQuestion)
+            changeQuestionArray(localStorageData.questionArray)
+            $('#form').on("submit", checkAnswer)
+            $("#next-question").on("click", setUpQuestion)
+            $("#shift").on("click", shiftAll);
+            refreshStreak(streak)
+            //Add keyboard shortcuts
+            $(document).on("click", ".char", function () {
+                    const char = $(this).text()
+                    const domEl = $('[name="answer"]')[0]
+                    const startPos = domEl.selectionStart
+                    const endPos = domEl.selectionEnd
+                    const currentVal = $(domEl).val()
+                    const newVal = currentVal.slice(0, startPos) + char + currentVal.slice(endPos)
+                    $(domEl).val(newVal)
+                    domEl.setSelectionRange(startPos + 1, startPos + 1)
+                    $(domEl).focus()
+                })
+            //Add some keyboard shortcuts
+            $(document).on("keydown", keyboardShortcut)
+            if (state === "question") {
+                $("#next-question").css("display", "none")
+                $("#manual-grading").css("display", "none")
+                $(".answer-explanation").css("display", "none")
+                $("#question").text(getCurrentQuestion());
+                $("#form").css("display", "block");
+                $("[name='answer']").val("");//sets the input box to empty
+                ($('[name="answer"]')[0]).focus();
+                ($('[name="answer"]')[0]).setSelectionRange(0, 0);
+            } else if (state === "answer") {
+                let $result = $("#result")
+                let processedAnswers = []
+                $("#form").css("display", "none");
+                for (let i = 0; i < answers.length; i++) {
+                    processedAnswers.push(processAnswer(answers[i]))
+                }
+                if (processedAnswers.includes(processAnswer(userAnswer))) {
+                    //If the user was correct, then show that they were correct.
+                    //However, make sure to not modify any variables...they already were modified last time.
+                    $result.text(correctFeedback[Math.floor(Math.random() * correctFeedback.length)]);
+                    $result.css("color", "green")
+                    $result.css("display", "block")
+                    $("#manual-grading").text("I got this wrong");
+                    $("#manual-grading").css("color", "red");
+                    $("#next-question").css("display", "inline-block")
+                    $("#manual-grading").css("display", "inline-block")
+                    $("#manual-grading").on("click", {ogResult: true}, manualGrading);
+                } else {
+                    $result.css("color", "red")
+                    $("#user-answer").text(userAnswer)
+                    if (answers.length === 1) {
+                        $("#correct-answer-sign").text("Correct Answer:")
+                        $("#correct-answer").text(answers[0])
+                    } else {
+                        $("#correct-answer-sign").text("Correct Answers:")
+                        $("#correct-answer").text(answers.join(", "))
+                    }
+                    $(".answer-explanation").css("display", "block")
+                    $("#manual-grading").text("I got this correct")
+                    $("#manual-grading").css("color", "green")
+                    $("#manual-grading").on("click", {ogResult: false}, manualGrading)
+                    $("#next-question").css("display", "inline-block")
+                    $("#manual-grading").css("display", "inline-block")
+                }
+            } else {
+                console.error("Error Document.ready function. LocalStorageData state neither question nor answer nor selection nor null/undefined.");
+            }
+        }
     });
 /*
 4. Compliments??????????
