@@ -156,7 +156,7 @@
             <button class="char" type="button">¡</button>
             <button class="char" type="button">¿</button>
         </div>
-        <img id="confetti" alt="Confetti falling" src="confetti.gif">
+        <img id="confetti" alt="Confetti falling" src="confetti_launcher.gif" width="30%">
         <form id="form">
             <label for="answer" class="answer-form" id="label">Your Answer:</label><br>
             <input type="text" class="answer-form" name="answer">
@@ -1163,10 +1163,12 @@ const streakLossFeedback = [
             $("#button-bar").css("display", "none")
             $("#streak").css("display", "none")
             $("#flaming-icon").css("display", "none")
-            $("#confetti").css("display", "inline")
+            setTimeout(function () {
+                $("#confetti").css("display", "inline")
+            }, 3000)
             setTimeout(function () {
                 $("#confetti").css("display", "none")
-            }, 2000)
+            }, 4000)
             setTimeout(function () {
                 reset()
             }, 8000)
