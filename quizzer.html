@@ -597,122 +597,15 @@ const data = {
     }
 }
 const correctFeedback = [
-  "Spot on!",
-  "You nailed it!",
-  "Absolutely right!",
-  "Brilliant answer!",
-  "You're on a roll!",
-  "Perfect match!",
-  "Way to go!",
-  "Genius move!",
-  "Superb choice!",
-  "Awesome job!",
-  "You make this look easy!",
-  "Fantastic work!",
-  "Incredible job!",
-  "You are crushing this!",
-  "Outstanding choice!",
-  "Magnificent response!",
-  "Top tier answer!",
-  "Phenomenal effort!",
-  "Perfect execution!",
-  "Masterful thinking!",
-  "Unstoppable energy!",
-  "Sensational work!",
-  "Bingo!",
-  "Exactly right!",
-  "You hit the bullseye!",
-  "Pure genius!",
-  "Remarkable answer!",
-  "You've got skills!",
-  "Spectacular work!",
-  "Flawless reasoning!",
-  "Inspirational stuff!",
-  "You're unstoppable!",
-  "Superb accuracy!",
-  "Legendary performance!",
-  "Splendid determination!",
-  "You are on fire!",
-  "Top notch response!",
-  "You know your stuff!",
-  "Utterly correct!",
-  "First class thinking!",
-  "A perfect result!",
-  "You're mastering this!",
-  "Exemplary effort!",
-  "Outstanding knowledge!",
-  "Brilliant clarity!",
-  "You've got this down!",
-  "Tremendous job!",
-  "Simply superb!"
+    "You got this correct!"
 ];
 const incorrectFeedback = [
-  "Almost!",
-  "So close!",
-  "Next time!",
-  "You've got the next one!",
-  "Ah, close!",
-  "Nice try anyway!",
-  "No sweat!",
-  "Keep going!",
-  "Shake it off!",
-  "Oof, close!",
-  "Next point is yours!",
-  "Almost had it!",
-  "Try the next one!",
-  "Bounce back next turn!",
-  "Don't worry about it!",
-  "Onto the next!",
-  "Nearly got it!",
-  "You'll get it next time!",
-  "Just missed it!",
-  "Ah, bummer!",
-  "Get 'em next round!",
-  "Still doing great!",
-  "No biggie!",
-  "Reset and try again!",
-  "You're fine!",
-  "Ah, tricky one!",
-  "We move on!",
-  "Love the effort!",
-  "Next question is yours!",
-  "A good guess!",
-  "Not quite!",
-  "Catch the next one!",
-  "Keep your chin up!",
-  "You're warming up!",
-  "No harm done!",
-  "Ah, tough break!",
-  "Onward!",
-  "Keep pushing!",
-  "You'll smash the next!",
-  "We believe in the next guess!",
-  "Oops, no worries!",
-  "Just a minor slip!",
-  "Save the luck for next time!",
-  "Refocus for the next!",
-  "Still in the game!",
-  "Almost counted it!",
-  "Next time for sure!",
-  "Keep that energy up!",
-  "A fine try!",
-  "Your comeback starts now!"
+    "You got this wrong."
 ];
 // JavaScript Array for Streak Losses
-
+//Currently just using one
 const streakLossFeedback = [
-  "You lost your streak, go build another one!",
-  "Your streak counter is back to zero!",
-  "That brings your run to an end!",
-  "You lost your record, start a new one!",
-  "That wrong answer resets your streak!",
-  "Your flawless run is gone, try again!",
-  "Your winning streak is gone, reset now!",
-  "Oof, your blazing streak just snapped!",
-  "Your perfect run just stopped!",
-  "You've lost your streak. Back at square one!",
-  "Your lucky run is finished!",
-  "That mistake breaks your momentum!"
+    "You've lost your streak."
 ];
     let courseSelected = ""
     let chapterSelected = ""
@@ -1367,8 +1260,7 @@ const streakLossFeedback = [
         }
     });
 /*
-Add "finish" if they're on their last question.
-Delete data after 7 days
+Delete data after 7 days?? Not necessary
 Test on Mac
 Shuffle every questionArray.length times so that they don't get the same predictable pattern.
 */
