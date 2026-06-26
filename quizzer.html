@@ -124,10 +124,16 @@
             top: 20px;
             z-index: 6;
         }
+        #logo {
+            filter: brightness(100%);
+        }
+        #logo:hover {
+            filter: brightness(80%);
+        }
     </style>
 </head>
 <body>
-    <a id="link-to-home" href="index.html"><img src="Spanish Quizzer logo.png" width="50px" alt="Spanish quizzer logo"></a>
+    <a id="link-to-home" href="index.html"><img id="logo" src="Spanish Quizzer logo.png" width="50px" alt="Spanish quizzer logo"></a>
     <button id="reset" type="button">Reset ⟳</button>
     <div id="quiz-box" data-current-question="" data-question-array="">
         <div id="content">
