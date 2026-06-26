@@ -1106,6 +1106,11 @@ const streakLossFeedback = [
             }
             streak++
             refreshStreak(streak)
+            if (getQuestionArray().length === 1 && questionRep[getCurrentQuestion()] <= 1) {
+                $("#next-question").text("Finish")
+            } else {
+                $("#next-question").text("Next Question")
+            }
             $("#manual-grading").text("I got this wrong");
             $("#manual-grading").css("color", "red");
             $("#manual-grading").on("click", {ogResult: true}, manualGrading);
@@ -1329,6 +1334,11 @@ const streakLossFeedback = [
                     $result.css("display", "block")
                     $("#manual-grading").text("I got this wrong");
                     $("#manual-grading").css("color", "red");
+                    if (getQuestionArray().length <= 1 && questionRep[getCurrentQuestion()] <= 1) {
+                        $("#next-question").text("Finish")
+                    } else {
+                        $("#next-question").text("Next Question")
+                    }
                     $("#next-question").css("display", "inline-block")
                     $("#manual-grading").css("display", "inline-block")
                     $("#manual-grading").on("click", {ogResult: true}, manualGrading);
