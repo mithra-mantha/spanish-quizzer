@@ -1064,10 +1064,35 @@ const streakLossFeedback = [
         const questionArray = getQuestionArray()
         if (!questionArray[0]) { //If it is an empty string or questionArray is empty, then finish.
             $("#quiz-title").text("You're done!")
-            $("#question").text(`Your accuracy was ${Math.round(questionsCorrect / totalQuestions * 100)}%.`)
+            const percent = Math.round(questionsCorrect / totalQuestions * 100)
+            let feedback = "";
+            if (percent === 100) {
+                $("#question").css("color", "green")
+                feedback = "Perfect score!"
+            } else if (percent >= 90) {
+                $("#question").css("color", "limegreen")
+                feedback = "You aced this quiz!"
+            } else if (percent >= 80) {
+                $("#question").css("color", "lime")
+                feedback = "Amazing job!"
+            } else if (percent >= 70) {
+                $("#question").css("color", "yellowgreen")
+                feedback = "Almost there!"
+            } else if (percent >= 60) {
+                 $("#question").css("color", "orange")
+                 feedback = "Better luck next time!"
+            } else if (percent >= 50) {
+                 $("#question").css("color", "orangered")
+                 feedback = "Try again."
+            } else {
+                 $("#question").css("color", "red")
+                 feedback = "You need more practice."
+            }
+            $("#question").text(`Your accuracy was ${percent}%. ${feedback}`)
             $("#button-bar").css("display", "none")
             $("#streak").css("display", "none")
             $("#flaming-icon").css("display", "none")
+            localStorage.clear()
             setTimeout(function () {
                 $("#confetti").css("display", "inline")
             }, 3000)
@@ -1077,7 +1102,7 @@ const streakLossFeedback = [
             setTimeout(function () {
                 reset()
             }, 8000)
-
+            return;
         } else {
         const question = questionArray[0]
         changeCurrentQuestion(question)
