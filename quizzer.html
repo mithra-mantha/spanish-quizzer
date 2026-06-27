@@ -133,44 +133,70 @@
         #logo:hover {
             filter: brightness(80%);
         }
+        #keyboard-shortcuts {
+            border: 3px solid black;
+            height: fit-content;
+            width: fit-content;
+            padding: 5px;
+            position: absolute;
+            right: 20px;
+            bottom: 20px;
+            background-color: rgb(201, 201, 201);
+        }
+        #course-disable, #chapter-disable, #topic-disable {
+            border: none;
+        }
     </style>
 </head>
 <body>
-    <a id="link-to-home" href="index.html"><img id="logo" src="Spanish Quizzer logo.png" width="50px" alt="Spanish quizzer logo"></a>
+    <a id="link-to-home" href="index.html"><img id="logo" src="Spanish Quizzer logo.png" width="50px" alt="Spanish quizzer logo" title="Click this to go to the homepage" aria-label="Homepage link"></a>
     <button id="reset" type="button">Reset ⟳</button>
     <img id="flaming-icon" src="flaming-streak-icon.png" alt="Flaming streak icon" width="70px">
     <p id="streak">Streak:  <span id="streak-num">0</span></p>
     <div id="quiz-box" data-current-question="" data-question-array="">
         <div id="content">
-        <h1 id="quiz-title">Quiz Mode</h1>
-        <h1 id="question"></h1>
-        <div id="button-bar">
-            <h2 id="special-characters-sign">Special characters:</h2>
-            <button id="shift" type="button">shift</button>
-            <button class="shift char" type="button">á</button>
-            <button class="shift char" type="button">é</button>
-            <button class="shift char" type="button">í</button>
-            <button class="shift char" type="button">ó</button>
-            <button class="shift char" type="button">ú</button>
-            <button class="shift char" type="button">ü</button>
-            <button class="shift char" type="button">ñ</button>
-            <button class="char" type="button">¡</button>
-            <button class="char" type="button">¿</button>
-        </div>
-        <img id="confetti" alt="Confetti falling" src="confetti_launcher.gif" width="30%">
-        <form id="form">
-            <label for="answer" class="answer-form" id="label">Your Answer:</label><br>
-            <input type="text" class="answer-form" name="answer">
-            <button type="submit" class="answer-form">Submit</button>
-        </form>
-        <h1 id="result" class="answer-explanation">You got this wrong.</h1>
-        <h2 class="answer-explanation user-answer">You answered:</h2>
-        <h3 class="answer-explanation user-answer" id="user-answer">Answer</h3>
-        <h2 class="answer-explanation correct-answer" id="correct-answer-sign">Correct Answer:</h2>
-        <h3 class="answer-explanation correct-answer" id="correct-answer">Real Answer</h3>
-        <button type="submit" id="next-question">Next Question</button>
-        <br>
-        <button type="button" id="manual-grading"></button>
+            <h1 id="quiz-title">Quiz Mode</h1>
+            <h1 id="question"></h1>
+            <div id="button-bar">
+                <h2 id="special-characters-sign">Special characters:</h2>
+                <button id="shift" type="button">shift</button>
+                <button class="shift char" type="button">á</button>
+                <button class="shift char" type="button">é</button>
+                <button class="shift char" type="button">í</button>
+                <button class="shift char" type="button">ó</button>
+                <button class="shift char" type="button">ú</button>
+                <button class="shift char" type="button">ü</button>
+                <button class="shift char" type="button">ñ</button>
+                <button class="char" type="button">¡</button>
+                <button class="char" type="button">¿</button>
+            </div>
+            <img id="confetti" alt="Confetti falling" src="confetti_launcher.gif" width="30%">
+            <form id="form">
+                <label for="answer" class="answer-form" id="label">Your Answer:</label><br>
+                <input type="text" class="answer-form" name="answer">
+                <button type="submit" class="answer-form">Submit</button>
+            </form>
+            <h1 id="result" class="answer-explanation">You got this wrong.</h1>
+            <h2 class="answer-explanation user-answer">You answered:</h2>
+            <h3 class="answer-explanation user-answer" id="user-answer">Answer</h3>
+            <h2 class="answer-explanation correct-answer" id="correct-answer-sign">Correct Answer:</h2>
+            <h3 class="answer-explanation correct-answer" id="correct-answer">Real Answer</h3>
+            <button type="submit" id="next-question">Next Question</button>
+            <br>
+            <button type="button" id="manual-grading"></button>
+            <div id="keyboard-shortcuts">
+                <h2>
+                    Keyboard shortcuts:
+                </h2>
+                <p>
+                    <strong>Alt + A, E, I, O, U</strong> → á, é, í, ó, ú <br>
+                    <strong>Alt + N</strong> → ñ <br>
+                    <strong>Alt + Y</strong> → ü <br>
+                    <strong>Alt + Q</strong> → Next question/submit answer <br>
+                    <strong>Alt + M</strong> → I got this question correct/wrong <br>
+                    For more information visit the <a href="index.html">homepage</a>.
+                </p>
+            </div>
         </div>
         <div id="selection">
             <form id="course-selection-form">
@@ -1092,6 +1118,7 @@ const streakLossFeedback = [
             $("#button-bar").css("display", "none")
             $("#streak").css("display", "none")
             $("#flaming-icon").css("display", "none")
+            $("#keyboard-shortcuts").css("display", "none")
             localStorage.clear()
             setTimeout(function () {
                 $("#confetti").css("display", "inline")
@@ -1204,8 +1231,12 @@ const streakLossFeedback = [
         $("#course-selection-form").one("submit", askUserForChapter)
     }
     $(document).ready(function() {
-        console.log(localStorage)
         $("#reset").on("click", resetButton)
+        if (!(window.innerWidth >= 1180 && window.innerHeight >= 668)) {
+            $("#keyboard-shortcuts").css("display", "none");
+        } else {
+            $("#keyboard-shortcuts").css("display", "revert");
+        }
         const state = localStorage.getItem("state")
         if (state === "selection" || state == null) {
             askUserForCourse()
