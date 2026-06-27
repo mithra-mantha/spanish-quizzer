@@ -23,6 +23,7 @@
         }
         #content {
             display: none;
+            
         }
         #quiz-title {
             text-align: center;
@@ -615,7 +616,6 @@ const streakLossFeedback = [
     let questionRep = {}
     let streak = 0;
     let oldStreak = 0;
-    let shift = "lowercase";
     let operatingSystem = ""
     if (navigator.platform.includes("MacIntel")) {
         operatingSystem = "macOS"
@@ -890,14 +890,12 @@ const streakLossFeedback = [
         //So that the user can input uppercase and lowercase special symbols.
         if ($("#shift").text() === "shift") {
             //Scenario where we need to uppercase everything.
-            shift = "uppercase"
             $("#shift").text("SHIFT")
             $(".shift").each(function (index, element) {
                 $(element).text($(element).text().toUpperCase()) //element is a DOM node
             })
         } else {
             //Scenario where we need to lowercase everything.
-            shift = "lowercase"
             $("#shift").text("shift")
             $(".shift").each(function (index, element) {
                 $(element).text($(element).text().toLowerCase()) //element is a DOM node
@@ -1260,8 +1258,8 @@ const streakLossFeedback = [
         }
     });
 /*
-Delete data after 7 days?? Not necessary
-Test on Mac
+Accuracy meter(that provides feedback based on level)
+Keyboard shortcuts on the side
 Shuffle every questionArray.length times so that they don't get the same predictable pattern.
 */
 
