@@ -616,6 +616,8 @@ const streakLossFeedback = [
     let questionRep = {}
     let streak = 0;
     let oldStreak = 0;
+    let questionsCorrect = 0;
+    let totalQuestions = 0
     let operatingSystem = ""
     if (navigator.platform.includes("MacIntel")) {
         operatingSystem = "macOS"
@@ -866,6 +868,8 @@ const streakLossFeedback = [
         localStorage.setItem("oldStreak", JSON.stringify(oldStreak))
         localStorage.setItem("currentQuestion", getCurrentQuestion())
         localStorage.setItem("questionArray", JSON.stringify(getQuestionArray()))
+        localStorage.setItem("totalQuestions", String(totalQuestions))
+        localStorage.setItem("questionsCorrect", String(questionsCorrect))
         //This stores EVERYTHING in localstorage, useful or not.
     }
     const getLocalStorage = function () {
@@ -880,7 +884,9 @@ const streakLossFeedback = [
             "streak":JSON.parse(localStorage.getItem("streak")),
             "oldStreak":JSON.parse(localStorage.getItem("oldStreak")),
             "currentQuestion":localStorage.getItem("currentQuestion"),
-            "questionArray":JSON.parse(localStorage.getItem("questionArray"))
+            "questionArray":JSON.parse(localStorage.getItem("questionArray")),
+            "totalQuestions":Number(localStorage.getItem("totalQuestions")),
+            "questionsCorrect":Number(localStorage.getItem("questionsCorrect"))
         }
     }
     const deleteLocalStorage = function () {
@@ -913,6 +919,7 @@ const streakLossFeedback = [
             questionRep[question] = questionRep[question] + 3 //To account for the one that checkAnswer just subtracted.
             streak = 0
             refreshStreak(streak)
+            questionsCorrect--
         } else {
             //We need to mark it correct instead.
             questionRep[question] = questionRep[question] - 3
@@ -920,6 +927,7 @@ const streakLossFeedback = [
                 questionArray.pop() //remove the question
             }
             streak = oldStreak + 1;
+            questionsCorrect++
             refreshStreak(streak);
         }
         changeQuestionArray(questionArray);
@@ -927,6 +935,7 @@ const streakLossFeedback = [
     }
     const reset = function () {
         $("*").removeAttr("style");
+        $("quiz-title").text("Quiz Mode")
         $("#course-disable").prop("disabled", false);
         $("#chapter-disable").prop("disabled", false);
         $("#topic-disable").prop("disabled", false);
@@ -943,6 +952,8 @@ const streakLossFeedback = [
         answer = "";
         userAnswer = "";
         questionRep = {};
+        questionsCorrect = 0;
+        totalQuestions = 0;
         //Remove all event listeners.
         $("button").each(function (index, element) {
             $(element).off();
@@ -996,6 +1007,8 @@ const streakLossFeedback = [
                 questionRep[getCurrentQuestion()] = questionRep[getCurrentQuestion()] - 1 //However, deduct one rep from the total.
             }
             streak++
+            questionsCorrect++
+            totalQuestions++
             refreshStreak(streak)
             if (getQuestionArray().length === 1 && questionRep[getCurrentQuestion()] <= 1) {
                 $("#next-question").text("Finish")
@@ -1013,6 +1026,7 @@ const streakLossFeedback = [
             }
             $result.css("color", "red")
             streak = 0
+            totalQuestions++
             refreshStreak(streak)
             $("#user-answer").text(userAnswer)
             if (answers.length === 1) {
@@ -1050,7 +1064,7 @@ const streakLossFeedback = [
         const questionArray = getQuestionArray()
         if (!questionArray[0]) { //If it is an empty string or questionArray is empty, then finish.
             $("#quiz-title").text("You're done!")
-            $("#question").text("Good job!")
+            $("#question").text(`Your accuracy was ${Math.round(questionsCorrect / totalQuestions * 100)}%.`)
             $("#button-bar").css("display", "none")
             $("#streak").css("display", "none")
             $("#flaming-icon").css("display", "none")
@@ -1181,6 +1195,8 @@ const streakLossFeedback = [
             questionRep = localStorageData.questionRep
             streak = localStorageData.streak
             oldStreak = localStorageData.oldStreak
+            totalQuestions = localStorageData.totalQuestions
+            questionsCorrect = localStorageData.questionsCorrect
             $("#content").css("display", "revert");
             $("#selection").css("display", "none")
             changeCurrentQuestion(localStorageData.currentQuestion)
