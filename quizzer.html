@@ -153,6 +153,8 @@
     <button id="reset" type="button">Reset ⟳</button>
     <img id="flaming-icon" src="flaming-streak-icon.png" alt="Flaming streak icon" width="70px">
     <p id="streak">Streak:  <span id="streak-num">0</span></p>
+    <audio id="correct-sound" src="correct_sound.mp3"></audio>
+    <audio id="wrong-sound" src="wrong_sound.mp3"></audio>
     <div id="quiz-box" data-current-question="" data-question-array="">
         <div id="content">
             <h1 id="quiz-title">Quiz Mode</h1>
@@ -1024,6 +1026,7 @@ const streakLossFeedback = [
             $result.text(correctFeedback[Math.floor(Math.random() * correctFeedback.length)]);
             $result.css("color", "green")
             $result.css("display", "block")
+            $("#correct-sound")[0].play()
             //Okay, now time to modify the question array b/c the user got it right!
             if (questionRep[getCurrentQuestion()] === 1) {
                 questionArray.shift(); //They have completed the required amounts of reps.
@@ -1050,6 +1053,7 @@ const streakLossFeedback = [
             } else {
                 $result.text(incorrectFeedback[Math.floor(Math.random() * incorrectFeedback.length)])
             }
+            $("#wrong-sound")[0].play()
             $result.css("color", "red")
             streak = 0
             totalQuestions++
@@ -1080,6 +1084,8 @@ const streakLossFeedback = [
         if (Object.keys(event).length !== 0) {
             event.preventDefault();
         };
+        $("#correct-sound")[0].pause()
+        $("#wrong-sound")[0].pause()
         oldStreak = streak
         $("#next-question").css("display", "none")
         $("#manual-grading").css("display", "none")
@@ -1237,6 +1243,10 @@ const streakLossFeedback = [
         } else {
             $("#keyboard-shortcuts").css("display", "revert");
         }
+        $("audio").each(function (index, element) {
+            element.volume = 0.2;
+        }) //Sets the volume of the audio to 0.2, which is just above "just right".
+
         const state = localStorage.getItem("state")
         if (state === "selection" || state == null) {
             askUserForCourse()
@@ -1330,10 +1340,10 @@ const streakLossFeedback = [
         }
     });
 /*
-Accuracy meter(that provides feedback based on level)
-Keyboard shortcuts on the side
 Shuffle every questionArray.length times so that they don't get the same predictable pattern.
+Sounds for correct, wrong
 */
+
 
 
 
