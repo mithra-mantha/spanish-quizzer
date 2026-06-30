@@ -23,7 +23,6 @@
         }
         #content {
             display: none;
-            
         }
         #quiz-title {
             text-align: center;
@@ -936,6 +935,43 @@ const streakLossFeedback = [
             })
         }
     }
+    const findQuestionSpots = function (question, array) {
+        // This returns either an array of indexes to insert, or undefined.
+        // It returns an array of 2
+        if (!array.includes(question)) {
+            if (array.length >= 6) {
+                return [2, 5];
+            } else {
+                return;
+            };
+        };
+        if (array.length <= 3) {
+            return;
+        };
+        const bufferLength = 2;
+        const startingBuffer = 2;
+        let candidates = []
+        for (let i = startingBuffer; i < array.length; i++) {
+            //Note to self keep it this way so that it always returns ordered list.
+            const checkArea = array.slice(Math.max(i - bufferLength, 0), Math.min(i + bufferLength + 1, array.length)); // + 1 is required because the second value is exclusive.
+            if (checkArea.includes(question)) {
+                continue;
+            }
+            if (candidates.length && candidates[candidates.length - 1] > i - bufferLength) {
+                //If this is too close to another candidate, return 0.
+                continue;
+            }
+            candidates.push(i)
+        };
+        if (candidates.length === 0) {
+            return;
+        } else if (candidates.length <= 2) {
+            return candidates
+        }
+        // We better find the lowest two if there are more than 2, but make sure they're not touching.
+        //Remember they were placed in order?
+        return [candidates[0], candidates[1]]
+    };
     const manualGrading = function (event) {
         let questionArray = getQuestionArray()
         let question = getCurrentQuestion()
@@ -951,8 +987,16 @@ const streakLossFeedback = [
         } else {
             //We need to mark it correct instead.
             questionRep[question] = questionRep[question] - 3
+            //We must remove the extra ones that checkAnswer has inserted.
+            const insertLocations = event.data.insertLocations
+            if (insertLocations) {
+            for (let i = 0; i < insertLocations.length; i++) {
+                const location = insertLocations[i]
+                questionArray.splice(location, 1)
+            }
+            }
             if (questionRep[question] <= 0) {
-                questionArray.pop() //remove the question
+                questionArray.pop() //remove the question from the end
             }
             streak = oldStreak + 1;
             questionsCorrect++
@@ -963,7 +1007,7 @@ const streakLossFeedback = [
     }
     const reset = function () {
         $("*").removeAttr("style");
-        $("quiz-title").text("Quiz Mode")
+        $("#quiz-title").text("Quiz Mode")
         $("#course-disable").prop("disabled", false);
         $("#chapter-disable").prop("disabled", false);
         $("#topic-disable").prop("disabled", false);
@@ -977,7 +1021,7 @@ const streakLossFeedback = [
         courseSelected = "";
         chapterSelected = "";
         topicSelected = "";
-        answer = "";
+        answers = [];
         userAnswer = "";
         questionRep = {};
         questionsCorrect = 0;
@@ -987,8 +1031,8 @@ const streakLossFeedback = [
             $(element).off();
         });
         $(document).off("keydown");
-        $(document).off("click")
-        $("*").off() ///Just in case destroys any remaining event listeners.
+        $(document).off("click");
+        $("*").off(); ///Just in case destroys any remaining event listeners.
         $("#reset").on("click", resetButton); //Don't destroy the event listener for resetButton!!!
         //Clear localStorage.
         deleteLocalStorage()
@@ -1023,6 +1067,7 @@ const streakLossFeedback = [
             processedAnswers.push(processAnswer(answers[i]))
         }
         if (processedAnswers.includes(processAnswer(userAnswer))) {
+            //It's correct!
             $result.text(correctFeedback[Math.floor(Math.random() * correctFeedback.length)]);
             $result.css("color", "green")
             $result.css("display", "block")
@@ -1046,8 +1091,9 @@ const streakLossFeedback = [
             }
             $("#manual-grading").text("I got this wrong");
             $("#manual-grading").css("color", "red");
-            $("#manual-grading").on("click", {ogResult: true}, manualGrading);
+            $("#manual-grading").on("click", {ogResult: true, insertLocations: undefined}, manualGrading);
         } else {
+            // Oops. The user got it wrong.
             if (streak >= 5) {
                 $result.text(streakLossFeedback[Math.floor(Math.random() * streakLossFeedback.length)])
             } else {
@@ -1070,9 +1116,18 @@ const streakLossFeedback = [
             //They got it wrong, so they should answer this question again two more times!
             questionArray.push(questionArray.shift()) //shift() returns the first element
             questionRep[getCurrentQuestion()] = questionRep[getCurrentQuestion()] + 2
+            //Oh, and make sure to repeat it to them again as soon as we can.
+            const insertLocations = findQuestionSpots(getCurrentQuestion(), questionArray);
+            if (insertLocations) {
+                //This makes sure that if it can't find a spot, then don't iterate over undefined.
+                for (let i = insertLocations.length - 1; i >= 0; i--) { //Makes sure to iterate backwards so no bugs happen
+                    const insertLocation = insertLocations[i]
+                    questionArray.splice(insertLocation, 0, getCurrentQuestion())
+                }
+            }
             $("#manual-grading").text("I got this correct")
             $("#manual-grading").css("color", "green")
-            $("#manual-grading").on("click", {ogResult: false}, manualGrading)
+            $("#manual-grading").on("click", {ogResult: false, insertLocations: insertLocations}, manualGrading)
         }
         changeQuestionArray(questionArray) //Permanently modifies the actual array.
         $("#next-question").css("display", "inline-block")
@@ -1166,7 +1221,7 @@ const streakLossFeedback = [
         const question = questionArray[0]
         changeCurrentQuestion(question)
         $("#question").text(question)
-        $("form").css("display", "block")
+        $("#form").css("display", "block")
         $("[name='answer']").val("");
         ($('[name="answer"]')[0]).focus();
         ($('[name="answer"]')[0]).setSelectionRange(0, 0); //autoselect
@@ -1340,8 +1395,9 @@ const streakLossFeedback = [
         }
     });
 /*
-Shuffle every questionArray.length times so that they don't get the same predictable pattern.
-Sounds for correct, wrong
+* Fix overflow problems(especially on chromebook)
+* Improve the correct and wrongfeedback as well as streakloss, improve wrong answer sound
+* Confusion alerts
 */
 
 
