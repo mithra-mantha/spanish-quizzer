@@ -1221,7 +1221,7 @@ const streakLossFeedback = [
         const questionArray = shuffleArray(Object.keys(data[courseSelected][chapterSelected][topicSelected]))
         changeQuestionArray(questionArray)
         $("#selection").css("display", "none")
-        $("#content").css("display", "revert")
+        $("#content").css("display", "")
         
         $('#form').on("submit", checkAnswer)
         $("#next-question").on("click", setUpQuestion)
@@ -1260,7 +1260,7 @@ const streakLossFeedback = [
         event.preventDefault()
         chapterSelected = ($("#chapter-selection")).val()
         storeInLocalStorage()
-        $("#topic-selection-form").css("display", "revert")
+        $("#topic-selection-form").css("display", "")
         $("#chapter-disable").prop("disabled", true)
         $("button.chapter-selection").css("visibility", "hidden")
         const topics = Object.keys(data[courseSelected][chapterSelected])
@@ -1275,7 +1275,7 @@ const streakLossFeedback = [
         event.preventDefault()
         courseSelected = $("#course-selection").val()
         storeInLocalStorage()
-        $("#chapter-selection-form").css("display", "revert")
+        $("#chapter-selection-form").css("display", "")
         $("#course-disable").prop("disabled", true)
         $("button.course-selection").css("visibility", "hidden")
         //The changes above made the course selection freeze. Poof!
@@ -1305,7 +1305,7 @@ const streakLossFeedback = [
         if (!(window.innerWidth >= 1180 && window.innerHeight >= 668)) {
             $("#keyboard-shortcuts").css("display", "none");
         } else {
-            $("#keyboard-shortcuts").css("display", "revert");
+            $("#keyboard-shortcuts").css("display", "");
         }
         $("audio").each(function (index, element) {
             element.volume = 0.2;
@@ -1327,7 +1327,7 @@ const streakLossFeedback = [
             oldStreak = localStorageData.oldStreak
             totalQuestions = localStorageData.totalQuestions
             questionsCorrect = localStorageData.questionsCorrect
-            $("#content").css("display", "revert");
+            $("#content").css("display", "");
             $("#selection").css("display", "none")
             changeCurrentQuestion(localStorageData.currentQuestion)
             changeQuestionArray(localStorageData.questionArray)
