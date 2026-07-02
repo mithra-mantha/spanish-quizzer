@@ -30,9 +30,18 @@
             margin-top: 20px;
             margin-bottom: 20px;
         }
-        .answer-explanation {
+        #answer-explanation-table {
             text-align: center;
             display: none;
+            margin-left: auto;
+            margin-right: auto;
+            border-collapse: collapse;
+            font-size: 1.2rem;
+            margin-bottom: 3vh;
+        }
+        th, td {
+            padding-left: 15px;
+            padding-right: 15px;
         }
         #question {
             text-align: center;
@@ -145,6 +154,9 @@
         #course-disable, #chapter-disable, #topic-disable {
             border: none;
         }
+        #correct-answer, #user-answer {
+            font-size: 1.2em;
+        }
     </style>
 </head>
 <body>
@@ -177,11 +189,21 @@
                 <input type="text" class="answer-form" name="answer">
                 <button type="submit" class="answer-form">Submit</button>
             </form>
-            <h1 id="result" class="answer-explanation">You got this wrong.</h1>
-            <h2 class="answer-explanation user-answer">You answered:</h2>
-            <h3 class="answer-explanation user-answer" id="user-answer">Answer</h3>
-            <h2 class="answer-explanation correct-answer" id="correct-answer-sign">Correct Answer:</h2>
-            <h3 class="answer-explanation correct-answer" id="correct-answer">Real Answer</h3>
+            <h1 id="result" class="answer-explanation">You got this ____.</h1>
+            <table id="answer-explanation-table">
+                <thead>
+                    <tr>
+                        <th class="answer-explanation user-answer">You answered:</th>
+                        <th class="answer-explanation correct-answer" id="correct-answer-sign">Correct Answer:</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td class="answer-explanation user-answer" id="user-answer">Answer</td>
+                        <td class="answer-explanation correct-answer" id="correct-answer">Real Answer</td>
+                    </tr>
+                </tbody>
+            </table>
             <button type="submit" id="next-question">Next Question</button>
             <br>
             <button type="button" id="manual-grading"></button>
@@ -1113,7 +1135,8 @@ const streakLossFeedback = [
                 $("#correct-answer-sign").text("Correct Answers:")
                 $("#correct-answer").text(answers.join(", "))
             }
-            $(".answer-explanation").css("display", "block")
+            $("#answer-explanation-table").css("display", "table")
+            $("#result").css("display", "block")
             //They got it wrong, so they should answer this question again two more times!
             questionArray.push(questionArray.shift()) //shift() returns the first element
             questionRep[getCurrentQuestion()] = questionRep[getCurrentQuestion()] + 2
@@ -1146,7 +1169,8 @@ const streakLossFeedback = [
         $("#next-question").css("display", "none")
         $("#manual-grading").css("display", "none")
         $("#manual-grading").off("click")
-        $(".answer-explanation").css("display", "none")
+        $("#answer-explanation-table").css("display", "none")
+        $("#result").css("display", "none")
         //Poof!
         //Time to set up the next question.
         const questionArray = getQuestionArray()
@@ -1344,7 +1368,8 @@ const streakLossFeedback = [
             if (state === "question") {
                 $("#next-question").css("display", "none")
                 $("#manual-grading").css("display", "none")
-                $(".answer-explanation").css("display", "none")
+                $("#answer-explanation-table").css("display", "none")
+                $("#result").css("display", "none")
                 $("#question").text(getCurrentQuestion());
                 $("#form").css("display", "block");
                 $("[name='answer']").val("");//sets the input box to empty
@@ -1383,7 +1408,8 @@ const streakLossFeedback = [
                         $("#correct-answer-sign").text("Correct Answers:")
                         $("#correct-answer").text(answers.join(", "))
                     }
-                    $(".answer-explanation").css("display", "block")
+                    $("#answer-explanation-table").css("display", "table")
+                    $("#result").css("display", "block")
                     $("#manual-grading").text("I got this correct")
                     $("#manual-grading").css("color", "green")
                     $("#manual-grading").on("click", {ogResult: false}, manualGrading)
