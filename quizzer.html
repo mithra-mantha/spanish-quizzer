@@ -1379,8 +1379,9 @@ const streakLossFeedback = [
                 ($('[name="answer"]')[0]).focus();
                 ($('[name="answer"]')[0]).setSelectionRange(0, 0);
             } else if (state === "answer") {
-                let $result = $("#result")
-                let processedAnswers = []
+                let $result = $("#result");
+                let processedAnswers = [];
+                $("#question").text(getCurrentQuestion());
                 $("#form").css("display", "none");
                 for (let i = 0; i < answers.length; i++) {
                     processedAnswers.push(processAnswer(answers[i]))
@@ -1402,6 +1403,7 @@ const streakLossFeedback = [
                     $("#manual-grading").css("display", "inline-block")
                     $("#manual-grading").on("click", {ogResult: true}, manualGrading);
                 } else {
+                    $result.text(incorrectFeedback[Math.floor(Math.random() * incorrectFeedback.length)]);
                     $result.css("color", "red")
                     $("#user-answer").text(userAnswer)
                     if (answers.length === 1) {
