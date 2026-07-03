@@ -768,7 +768,7 @@ const streakLossFeedback = [
             //Entirely different setup for macOS. 
             const keyPressed = event.code
             const keys = ["KeyA", "KeyE", "KeyI", "KeyO", "KeyU", "KeyN", "KeyY", "KeyQ", "KeyM"]
-            if ((keys.includes(keyPressed) || (keyPressed === "Digit1" && event.shiftKey) || (keyPressed === "Slash" && event.shiftKey)) && event.altKey){
+            if ((keys.includes(keyPressed) || (keyPressed === "Digit1" && event.shiftKey) || (keyPressed === "Slash")) && event.altKey){
                 event.preventDefault()
                 const shifted = Boolean(event.originalEvent.getModifierState("CapsLock") ^ event.shiftKey) // ^ is bitwise exclusive or operator. Since it returns 0 or 1, you have to use Boolean() on it.
                 switch (keyPressed) {
@@ -822,14 +822,12 @@ const streakLossFeedback = [
                         }
                         break;
                     case "Slash":
-                        if (event.shiftKey) {
-                            insertChar("¿")
-                        }
+                        insertChar("¿")
                         break;
                     case "Digit1":
                         if (event.shiftKey) {
                             insertChar("¡")
-                        }
+                        } //Otherwise macos automatically inserts an upside down exclamation mark.
                         break;
                     case "KeyQ":
                         if ($("#form").css("display") === "none") {
@@ -857,7 +855,7 @@ const streakLossFeedback = [
             }
         } else {
             const keyPressed = event.key
-            const keys = ["a", "e", "i", "o", "u", "n", "y", "A", "E", "I", "O", "U", "N", "Y", "!", "?", "q", "m"];
+            const keys = ["a", "e", "i", "o", "u", "n", "y", "A", "E", "I", "O", "U", "N", "Y", "!", "1", "?", "/", "q", "m"];
             if (keys.includes(keyPressed) && event.altKey) {
                 event.preventDefault();
             }
@@ -877,8 +875,8 @@ const streakLossFeedback = [
                     case "U": insertChar("Ú"); break;
                     case "Y": insertChar("Ü"); break;
                     case "N": insertChar("Ñ"); break;
-                    case "?": insertChar("¿"); break;
-                    case "!": insertChar("¡"); break;
+                    case "?": case "/": insertChar("¿"); break;
+                    case "!": case "1": insertChar("¡"); break;
                     case "q":
                         if ($("#form").css("display") === "none") {
                             //Scenario where the input box isn't there.
