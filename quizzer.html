@@ -169,8 +169,8 @@
     <button id="reset" type="button">Reset ⟳</button>
     <img id="flaming-icon" src="flaming-streak-icon.png" alt="Flaming streak icon" width="70px">
     <p id="streak">Streak:  <span id="streak-num">0</span></p>
-    <audio id="correct-sound" src="correct_sound.mp3"></audio>
-    <audio id="wrong-sound" src="wrong_sound.mp3"></audio>
+    <audio id="correct-sound" src="correct_sound.mp3" preload="auto"></audio>
+    <audio id="wrong-sound" src="wrong_sound.mp3" preload="auto"></audio>
     <div id="keyboard-shortcuts">
     <h2>
         Keyboard shortcuts:
@@ -1251,7 +1251,9 @@ const streakLossFeedback = [
             event.preventDefault();
         };
         $("#correct-sound")[0].pause()
+        $("#correct-sound")[0].currentTime = 0
         $("#wrong-sound")[0].pause()
+        $("#wrong-sound")[0].currentTime = 0
         oldStreak = streak
         $("#button-bar").css("display", "revert")
         $("#next-question").css("display", "none")
