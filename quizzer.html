@@ -147,9 +147,11 @@
             width: fit-content;
             padding: 5px;
             position: absolute;
-            right: 20px;
-            bottom: 20px;
+            right: 10px;
+            bottom: 10px;
+            z-index: 100;
             background-color: rgb(201, 201, 201);
+            font-size: clamp(10px, 0.7dvh + 0.7dvw, 22px);
         }
         #course-disable, #chapter-disable, #topic-disable {
             border: none;
@@ -169,6 +171,19 @@
     <p id="streak">Streak:  <span id="streak-num">0</span></p>
     <audio id="correct-sound" src="correct_sound.mp3"></audio>
     <audio id="wrong-sound" src="wrong_sound.mp3"></audio>
+    <div id="keyboard-shortcuts">
+    <h2>
+        Keyboard shortcuts:
+    </h2>
+    <p>
+        <strong>Alt + A, E, I, O, U</strong> → á, é, í, ó, ú <br>
+        <strong>Alt + N</strong> → ñ <br>
+        <strong>Alt + Y</strong> → ü <br>
+        <strong>Alt + Q</strong> → Next question/submit answer <br>
+        <strong>Alt + M</strong> → I got this question correct/wrong <br>
+        For more information visit the <a href="index.html">homepage</a>.
+    </p>
+    </div>
     <div id="quiz-box" data-current-question="" data-question-array="">
         <div id="content">
             <h1 id="quiz-title">Quiz Mode</h1>
@@ -210,19 +225,6 @@
             <button type="submit" id="next-question">Next Question</button>
             <br>
             <button type="button" id="manual-grading"></button>
-            <div id="keyboard-shortcuts">
-                <h2>
-                    Keyboard shortcuts:
-                </h2>
-                <p>
-                    <strong>Alt + A, E, I, O, U</strong> → á, é, í, ó, ú <br>
-                    <strong>Alt + N</strong> → ñ <br>
-                    <strong>Alt + Y</strong> → ü <br>
-                    <strong>Alt + Q</strong> → Next question/submit answer <br>
-                    <strong>Alt + M</strong> → I got this question correct/wrong <br>
-                    For more information visit the <a href="index.html">homepage</a>.
-                </p>
-            </div>
         </div>
         <div id="selection">
             <form id="course-selection-form">
@@ -1321,10 +1323,11 @@ const streakLossFeedback = [
     }
     $(document).ready(function() {
         $("#reset").on("click", resetButton)
-        if (!(window.innerWidth >= 1180 && window.innerHeight >= 668)) {
-            $("#keyboard-shortcuts").css("display", "none");
-        } else {
-            $("#keyboard-shortcuts").css("display", "revert");
+        //Set up the keyboard shortcuts sign.
+        const windowWidth = window.innerWidth
+        const windowHeight = window.innerHeight
+        if ((windowHeight <= 695 && windowWidth <= 500) || (windowHeight <= 559 && windowWidth <= 800)) {
+            $("#keyboard-shortcuts").css("display", "none")
         }
         $("audio").each(function (index, element) {
             element.volume = 0.2;
@@ -1430,6 +1433,7 @@ const streakLossFeedback = [
 * Fix overflow problems(especially on chromebook)
 * Improve the correct and wrongfeedback as well as streakloss, improve wrong answer sound
 * Confusion alerts
+* Change it so that you don't need to press shift for upside down question mark/exclamation mark
 */
 
 
