@@ -1140,6 +1140,7 @@ const streakLossFeedback = [
                 $("#correct-answer-sign").text("Correct Answers:")
                 $("#correct-answer").text(answers.join(", "))
             }
+            $("#button-bar").css("display", "none")
             $("#answer-explanation-table").css("display", "table")
             $("#result").css("display", "block")
             //They got it wrong, so they should answer this question again two more times!
@@ -1171,6 +1172,7 @@ const streakLossFeedback = [
         $("#correct-sound")[0].pause()
         $("#wrong-sound")[0].pause()
         oldStreak = streak
+        $("#button-bar").css("display", "revert")
         $("#next-question").css("display", "none")
         $("#manual-grading").css("display", "none")
         $("#manual-grading").off("click")
@@ -1247,7 +1249,7 @@ const streakLossFeedback = [
         $('#form').on("submit", checkAnswer)
         $("#next-question").on("click", setUpQuestion)
         $("#shift").on("click", shiftAll);
-
+        $("#button-bar").css("display", "")
         const question = questionArray[0]
         changeCurrentQuestion(question)
         $("#question").text(question)
@@ -1376,6 +1378,7 @@ const streakLossFeedback = [
                 $("#manual-grading").css("display", "none")
                 $("#answer-explanation-table").css("display", "none")
                 $("#result").css("display", "none")
+                $("#button-bar").css("display", "")
                 $("#question").text(getCurrentQuestion());
                 $("#form").css("display", "block");
                 $("[name='answer']").val("");//sets the input box to empty
@@ -1386,6 +1389,7 @@ const streakLossFeedback = [
                 let processedAnswers = [];
                 $("#question").text(getCurrentQuestion());
                 $("#form").css("display", "none");
+                $("#button-bar").css("display", "none")
                 for (let i = 0; i < answers.length; i++) {
                     processedAnswers.push(processAnswer(answers[i]))
                 }
