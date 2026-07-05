@@ -269,7 +269,7 @@
             </form>
         </div>
     </div>
-    <p id="version">V65</p>
+    <p id="version">V67</p>
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
 <script>
     const Chapter1 = {
@@ -758,13 +758,14 @@ const streakLossFeedback = [
     let chapterSelected = ""
     let topicSelected = ""
     let userAnswer = ""
-    let answers = []
-    let questionRep = {}
+    let answers = [];
+    let questionRep = {};
     let streak = 0;
     let oldStreak = 0;
     let questionsCorrect = 0;
-    let totalQuestions = 0
-    let operatingSystem = ""
+    let totalQuestions = 0;
+    let insertLocations = [];
+    let operatingSystem = "";
     if (navigator.platform.includes("MacIntel")) {
         operatingSystem = "macOS"
     }
@@ -811,9 +812,9 @@ const streakLossFeedback = [
         for (let i = shuffled.length - 1; i > 0; i--) {
             j = Math.floor(Math.random() * (i + 1));
             [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]]
-        }
-        return shuffled
-    }
+        };
+        return shuffled;
+    };
     const processAnswer = function (answer) {
         answer = answer.toLowerCase()
 
@@ -834,6 +835,10 @@ const streakLossFeedback = [
         answer = answer.replaceAll("(", "")
         answer = answer.replaceAll("|", "")
         answer = answer.replaceAll("$", "")
+        answer = answer.replaceAll("?", "")
+        answer = answer.replaceAll("!", "")
+        answer = answer.replaceAll("¿", "")
+        answer = answer.replaceAll("¡", "")
         return answer
     }
     const insertChar = function (char, deletePrevious=false) {
@@ -969,6 +974,7 @@ const streakLossFeedback = [
                     case "?": case "/": insertChar("¿"); break;
                     case "!": case "1": insertChar("¡"); break;
                     case "q":
+                    case "Q":
                         if ($("#form").css("display") === "none") {
                             //Scenario where the input box isn't there.
                             $("#next-question").trigger("click");
@@ -981,6 +987,7 @@ const streakLossFeedback = [
                         }
                         break;
                     case "m":
+                    case "M":
                         if ($("#form").css("display") === "none") {
                             //It should be grading time.
                             if ($("#result").css("color") === "rgb(255, 0, 0)") {
@@ -1014,28 +1021,35 @@ const streakLossFeedback = [
         localStorage.setItem("questionArray", JSON.stringify(getQuestionArray()))
         localStorage.setItem("totalQuestions", String(totalQuestions))
         localStorage.setItem("questionsCorrect", String(questionsCorrect))
+        localStorage.setItem("insertLocations", JSON.stringify(insertLocations))
+        localStorage.setItem("$resultText", $("#result").text())
         //This stores EVERYTHING in localstorage, useful or not.
     }
     const getLocalStorage = function () {
-        return {
-            "state":localStorage.getItem("state"),
-            "courseSelected":localStorage.getItem("courseSelected"),
-            "chapterSelected":localStorage.getItem("chapterSelected"),
-            "topicSelected":localStorage.getItem("topicSelected"),
-            "answers":JSON.parse(localStorage.getItem("answers")),
-            "userAnswer":localStorage.getItem("userAnswer"),
-            "questionRep":JSON.parse(localStorage.getItem("questionRep")),
-            "streak":JSON.parse(localStorage.getItem("streak")),
-            "oldStreak":JSON.parse(localStorage.getItem("oldStreak")),
-            "currentQuestion":localStorage.getItem("currentQuestion"),
-            "questionArray":JSON.parse(localStorage.getItem("questionArray")),
-            "totalQuestions":Number(localStorage.getItem("totalQuestions")),
-            "questionsCorrect":Number(localStorage.getItem("questionsCorrect"))
+        try {
+            return {
+                "state":localStorage.getItem("state"),
+                "courseSelected":localStorage.getItem("courseSelected"),
+                "chapterSelected":localStorage.getItem("chapterSelected"),
+                "topicSelected":localStorage.getItem("topicSelected"),
+                "answers":JSON.parse(localStorage.getItem("answers")),
+                "userAnswer":localStorage.getItem("userAnswer"),
+                "questionRep":JSON.parse(localStorage.getItem("questionRep")),
+                "streak":JSON.parse(localStorage.getItem("streak")),
+                "oldStreak":JSON.parse(localStorage.getItem("oldStreak")),
+                "currentQuestion":localStorage.getItem("currentQuestion"),
+                "questionArray":JSON.parse(localStorage.getItem("questionArray")),
+                "totalQuestions":Number(localStorage.getItem("totalQuestions")),
+                "questionsCorrect":Number(localStorage.getItem("questionsCorrect")),
+                "insertLocations":JSON.parse(localStorage.getItem("insertLocations")),
+                "$resultText":localStorage.getItem("$resultText"),
+            }
+        } catch {
+            return {
+                state:"selection"
+            }
         }
-    }
-    const deleteLocalStorage = function () {
-        localStorage.clear()
-    }
+}
     const shiftAll = function () {
         //So that the user can input uppercase and lowercase special symbols.
         if ($("#shift").text() === "shift") {
@@ -1105,15 +1119,14 @@ const streakLossFeedback = [
             //We need to mark it correct instead.
             questionRep[question] = questionRep[question] - 3
             //We must remove the extra ones that checkAnswer has inserted.
-            const insertLocations = event.data.insertLocations
             if (insertLocations) {
-            for (let i = 0; i < insertLocations.length; i++) {
-                const location = insertLocations[i]
-                questionArray.splice(location, 1)
-            }
-            }
-            if (questionRep[question] <= 0) {
-                questionArray.pop() //remove the question from the end
+                for (let i = 0; i < insertLocations.length; i++) {
+                    const location = insertLocations[i]
+                    questionArray.splice(location, 1)
+                }
+                }
+                if (questionRep[question] <= 0) {
+                    questionArray.pop() //remove the question from the end
             }
             streak = oldStreak + 1;
             questionsCorrect++
@@ -1152,7 +1165,7 @@ const streakLossFeedback = [
         $("*").off(); ///Just in case destroys any remaining event listeners.
         $("#reset").on("click", resetButton); //Don't destroy the event listener for resetButton!!!
         //Clear localStorage.
-        deleteLocalStorage()
+        localStorage.clear()
         // Make sure to add the default required element though.
         $("#course-selection").append("<option value='' disabled selected hidden>Please select an option</option>");
         $("#chapter-selection").append("<option value='' disabled selected hidden>Please select an option</option>");
@@ -1208,7 +1221,7 @@ const streakLossFeedback = [
             }
             $("#manual-grading").text("I got this wrong");
             $("#manual-grading").css("color", "red");
-            $("#manual-grading").on("click", {ogResult: true, insertLocations: undefined}, manualGrading);
+            $("#manual-grading").on("click", {ogResult: true}, manualGrading);
         } else {
             // Oops. The user got it wrong.
             //First, let's check if they confused it with a different question.
@@ -1261,7 +1274,7 @@ const streakLossFeedback = [
             questionArray.push(questionArray.shift()) //shift() returns the first element
             questionRep[getCurrentQuestion()] = questionRep[getCurrentQuestion()] + 2
             //Oh, and make sure to repeat it to them again as soon as we can.
-            const insertLocations = findQuestionSpots(getCurrentQuestion(), questionArray);
+            insertLocations = findQuestionSpots(getCurrentQuestion(), questionArray);
             if (insertLocations) {
                 //This makes sure that if it can't find a spot, then don't iterate over undefined.
                 for (let i = insertLocations.length - 1; i >= 0; i--) { //Makes sure to iterate backwards so no bugs happen
@@ -1271,7 +1284,7 @@ const streakLossFeedback = [
             }
             $("#manual-grading").text("I got this correct")
             $("#manual-grading").css("color", "green")
-            $("#manual-grading").on("click", {ogResult: false, insertLocations: insertLocations}, manualGrading)
+            $("#manual-grading").on("click", {ogResult: false}, manualGrading)
         }
         changeQuestionArray(questionArray) //Permanently modifies the actual array.
         $("#next-question").css("display", "inline-block")
@@ -1452,7 +1465,7 @@ const streakLossFeedback = [
         }) //Sets the volume of the audio to 0.2, which is just above "just right".
 
         const state = localStorage.getItem("state")
-        if (state === "selection" || state == null) {
+        if (state === "selection" || !state) {
             askUserForCourse()
             return;
         } else {
@@ -1467,6 +1480,7 @@ const streakLossFeedback = [
             oldStreak = localStorageData.oldStreak
             totalQuestions = localStorageData.totalQuestions
             questionsCorrect = localStorageData.questionsCorrect
+            insertLocations = localStorageData.insertLocations
             $("#content").css("display", "revert");
             $("#selection").css("display", "none")
             changeCurrentQuestion(localStorageData.currentQuestion)
@@ -1506,13 +1520,13 @@ const streakLossFeedback = [
                 $("#question").text(getCurrentQuestion());
                 $("#form").css("display", "none");
                 $("#button-bar").css("display", "none")
+                $result.text(localStorageData.$resultText)
                 for (let i = 0; i < answers.length; i++) {
                     processedAnswers.push(processAnswer(answers[i]))
                 }
                 if (processedAnswers.includes(processAnswer(userAnswer))) {
                     //If the user was correct, then show that they were correct.
                     //However, make sure to not modify any variables...they already were modified last time.
-                    $result.text(correctFeedback[Math.floor(Math.random() * correctFeedback.length)]);
                     $result.css("color", "green")
                     $result.css("display", "block")
                     $("#manual-grading").text("I got this wrong");
@@ -1526,7 +1540,6 @@ const streakLossFeedback = [
                     $("#manual-grading").css("display", "inline-block")
                     $("#manual-grading").on("click", {ogResult: true}, manualGrading);
                 } else {
-                    $result.text(incorrectFeedback[Math.floor(Math.random() * incorrectFeedback.length)]);
                     $result.css("color", "red")
                     $("#user-answer").text(userAnswer)
                     if (answers.length === 1) {
