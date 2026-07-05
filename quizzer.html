@@ -1211,7 +1211,32 @@ const streakLossFeedback = [
             $("#manual-grading").on("click", {ogResult: true, insertLocations: undefined}, manualGrading);
         } else {
             // Oops. The user got it wrong.
-            if (streak >= 5) {
+            //First, let's check if they confused it with a different question.
+            const processedUserAnswer = processAnswer(userAnswer)
+            const questionAnswerObject = data[courseSelected][chapterSelected][topicSelected]
+            let match;
+            let confusedFeedback;
+            for (const questionInArray of questionArray) {
+                const answersForQuestion = questionAnswerObject[questionInArray]
+                //Loops through the different answers for each question.
+                for (const answer of answersForQuestion) {
+                    if (processAnswer(answer) === processedUserAnswer) {
+                        match = questionInArray;
+                    }
+                }
+            }
+            if (match) {
+                //Now, let's proceed to find what the question was asking for.
+                const matchArray = match.split('"')
+                if (matchArray.length === 3 && matchArray[1].trim()) { //Makes sure that matchArray[1] is not empty.
+                    confusedFeedback = `Did you confuse it with "${matchArray[1]}"?`
+                } 
+            }
+
+
+            if (confusedFeedback) {
+                $result.text(confusedFeedback)
+            } else if (streak >= 5) {
                 $result.text(streakLossFeedback[Math.floor(Math.random() * streakLossFeedback.length)])
             } else {
                 $result.text(incorrectFeedback[Math.floor(Math.random() * incorrectFeedback.length)])
