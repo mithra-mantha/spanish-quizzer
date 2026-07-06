@@ -1513,6 +1513,13 @@ const streakLossFeedback = [
         if (getSystemInfo().device !== "Desktop") {
             alert("You are on a non-recommended device. It is strongly recommended to use a laptop instead. A few features, especially keyboard shortcuts, are prone to glitches.")
         }
+        $(document).on("copy", function (event) {
+            event.preventDefault()
+        })
+        $(document).on("paste", function (event) {
+            event.preventDefault()
+            alert("Nice try! You have to type the answer, not copy and paste it.")
+        })
         const state = localStorage.getItem("state")
         if (state === "selection" || !state) {
             askUserForCourse()
