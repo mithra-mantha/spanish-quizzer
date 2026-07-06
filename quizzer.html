@@ -270,7 +270,7 @@
             </form>
         </div>
     </div>
-    <p id="version">V68</p>
+    <p id="version">V70</p>
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
 <script>
     const Chapter1 = {
@@ -755,17 +755,25 @@ const streakLossFeedback = [
     "Lost the streak, but you're still learning.",
     "Beat your lost streak this time!",
 ];
+    //Used to access the answers from the data object.
     let courseSelected = ""
     let chapterSelected = ""
     let topicSelected = ""
+    //This is mainly so that storeInLocalStorage can access these.
     let userAnswer = ""
     let answers = [];
+    //An object that stores the amount of reps the user still has to do for each question.
     let questionRep = {};
+    //This stores the streak and is updated by refreshStreak()
     let streak = 0;
+    //This stores the previous state of the streak from the question before and is primarily for manualGrading to revert to the old streak.
     let oldStreak = 0;
+    //These two are for recording accuracy.
     let questionsCorrect = 0;
     let totalQuestions = 0;
+    // This is a global also for storeInLocalStorage so that manualGrading can access it. insertLocations stores all locations besides the end of the array to insert the question that was wrong, and is produced by findQuestionSpots, which makes sure there's no consecutives.
     let insertLocations = [];
+    // This is actually an outdated global variable that I should remove, and it is for keyboardShortcuts.
     let operatingSystem = "";
     if (navigator.platform.includes("MacIntel")) {
         operatingSystem = "macOS"
@@ -858,11 +866,11 @@ const streakLossFeedback = [
         info["browser"] = browser
         return info;
     }
-    const processAnswer = function (answer) {
+    const processAnswer = function (answer, removePunctuation=true, removeSpaces=true) {
         answer = answer.toLowerCase()
-
-        answer = answer.replaceAll(" ", "") //Removes all spaces.
-
+        if (removeSpaces) {
+            answer = answer.replaceAll(" ", "") //Removes all spaces.
+        }
         //Remove all other weird symbols.
         answer = answer.replaceAll("[", "")
         answer = answer.replaceAll("]", "")
@@ -870,18 +878,20 @@ const streakLossFeedback = [
         answer = answer.replaceAll(";", "")
         answer = answer.replaceAll("{", "")
         answer = answer.replaceAll("}", "")
-        answer = answer.replaceAll(",", "")
-        answer = answer.replaceAll(".", "")
         answer = answer.replaceAll("\\", "")
         answer = answer.replaceAll("/", "")
         answer = answer.replaceAll(")", "")
         answer = answer.replaceAll("(", "")
         answer = answer.replaceAll("|", "")
         answer = answer.replaceAll("$", "")
-        answer = answer.replaceAll("?", "")
-        answer = answer.replaceAll("!", "")
-        answer = answer.replaceAll("¿", "")
-        answer = answer.replaceAll("¡", "")
+        if (removePunctuation) {
+            answer = answer.replaceAll("?", "")
+            answer = answer.replaceAll("!", "")
+            answer = answer.replaceAll("¿", "")
+            answer = answer.replaceAll("¡", "")
+            answer = answer.replaceAll(",", "")
+            answer = answer.replaceAll(".", "")
+        }
         return answer
     }
     const insertChar = function (char, deletePrevious=false) {
@@ -1155,8 +1165,14 @@ const streakLossFeedback = [
         let question = getCurrentQuestion()
         if (event.data.ogResult) { //Event.data is boolean
             //If it is true then that means that we need to mark it wrong.
-            if (!questionArray.includes(question)) {
-                questionArray.push(question)
+            questionArray.push(question)
+            insertLocations = findQuestionSpots(getCurrentQuestion(), questionArray);
+            if (insertLocations) {
+                //This makes sure that if it can't find a spot, then don't iterate over undefined.
+                for (let i = insertLocations.length - 1; i >= 0; i--) { //Makes sure to iterate backwards so no bugs happen
+                    const insertLocation = insertLocations[i]
+                    questionArray.splice(insertLocation, 0, getCurrentQuestion())
+                }
             }
             questionRep[question] = questionRep[question] + 3 //To account for the one that checkAnswer just subtracted.
             streak = 0
@@ -1272,28 +1288,45 @@ const streakLossFeedback = [
         } else {
             // Oops. The user got it wrong.
             //First, let's check if they confused it with a different question.
-            const processedUserAnswer = processAnswer(userAnswer)
             const questionAnswerObject = data[courseSelected][chapterSelected][topicSelected]
-            let match;
             let confusedFeedback;
-            for (const questionInArray of questionArray) {
-                const answersForQuestion = questionAnswerObject[questionInArray]
-                //Loops through the different answers for each question.
-                for (const answer of answersForQuestion) {
-                    if (processAnswer(answer) === processedUserAnswer) {
-                        match = questionInArray;
+            let confusionIterations = 0;
+            // Uses function recursion to narrow down if there are multiple results.
+            function checkForConfusion (removePunctuation=true, removeSpaces=true) {
+                let matches = [];
+                const processedUserAnswer = processAnswer(userAnswer, removePunctuation, removeSpaces)
+                for (const questionInArray of Object.keys(questionAnswerObject)) {
+                    const answersForQuestion = questionAnswerObject[questionInArray]
+                    //Loops through the different answers for each question.
+                    for (const answer of answersForQuestion) {
+                        if (processAnswer(answer, removePunctuation, removeSpaces) === processedUserAnswer) {
+                            if (!matches.includes(questionInArray)) {
+                                matches.push(questionInArray);
+                            }
+                        }
+                    }
+                }
+                if (matches.length === 1 || confusionIterations === 4) {
+                    //Now, let's proceed to find what the question was asking for.
+                    const matchArray = matches[0].split('"')
+                    if (matchArray.length === 3 && matchArray[1].trim()) { //Makes sure that matchArray[1] is not empty.
+                        confusedFeedback = `Did you confuse it with "${matchArray[1]}"?`
+                        return;
+                    } 
+                } else if (matches.length > 1) {
+                    //Do more detailed filtering...that wasn't enough.
+                    //First let's do that same loop, but by processing the answer WITHOUT spaces removal.
+                    confusionIterations++
+                    if (confusionIterations === 1) {
+                        checkForConfusion(true, false)
+                    } else if (confusionIterations === 2) {
+                        checkForConfusion(false, true)
+                    } else if (confusionIterations === 3) {
+                        checkForConfusion(false, false)
                     }
                 }
             }
-            if (match) {
-                //Now, let's proceed to find what the question was asking for.
-                const matchArray = match.split('"')
-                if (matchArray.length === 3 && matchArray[1].trim()) { //Makes sure that matchArray[1] is not empty.
-                    confusedFeedback = `Did you confuse it with "${matchArray[1]}"?`
-                } 
-            }
-
-
+            checkForConfusion()
             if (confusedFeedback) {
                 $result.text(confusedFeedback)
             } else if (streak >= 5) {
@@ -1619,37 +1652,14 @@ const streakLossFeedback = [
         }
     });
 /*
-* Add better matching for cases like por que? and porque
-*/
-
-
-
-
-/*Main Psuedocode:
-Step 1: All functions are defined. All predefined, stuff get ready.
-Step 2: The code adds an event listener for when the submit event happens, which then calls the check function.
-Step 3: The check function then checks and shows the results.
-Step 4: When the "next" button is pressed then the setup function sets up the next question, and the cycle repeats.
-Step 5: It always checks if the user has finished the questions and if it has then the script terminates by showing party sign and deletes the form so that the submit event never happens again.
-The current question as well as the array of questions is defined as data-* attribute in the quizbox div.
-
-Subpseudocode for the topic selection.
-Step 1: It asks you for your year(1a, 1b, etc.) An event listener is added for when you finish that.
-Step 2: After you click it, the old event listener is deleted and it now asks you for your chapter. An event listener is there for that.
-Step 3: after you select that, it deletes the old event listener and it now asks for your topic. An event listener is there for that.
-Step 4: Once that happens, the regular content loads.
-
-Subpseudocode for the "I got it correct/wrong" button.
-Step 1: When this button is clicked, a function is called.
-Step 2: It reverses the effect that checkAnswer() did.
-Step 3: It calls setUpQuestion like the generic next button.
-
-Subpseudocode for the localStorage part:
-Step 1: If the user was still selecting their course/chapter/topic, run normally.
-Step 2: Otherwise, delete the forms, run setUp() and reassign variables.
-Step 3: Depending on their state-
-    Question: Proceed as normal.
-    Answer: Make the question disappear and trigger checkAnswer().
+Notes for future:
+    When school starts, you can process the textbook data into real questions.
+    Some things to keep in mind:
+        Each question MUST contain only two double quotes(") for the confusion logic to work correctly
+        They should wrap around the thing that should be translated into spanish(for example, 'What is "engineer(male)"?'). 
+            Note that the gender/number of the nouns should be KEPT in there(otherwise it would say 'Did you confuse it with "engineer"?' if they put female instead of male)
+        For verbs, there should be separate for memorizing the infinitive and memorizing the conjugations.
+        For adjectives/nouns with different forms, it should be conjugated. For example, instead of asking what is engineer, it should ask what is a male engineer, mix of male and female engineers, etc.
 */
 </script>
 </body>
