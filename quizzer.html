@@ -124,6 +124,7 @@
             padding: 5px 10px;
             border: 2px solid black;
             background-color: rgb(235, 235, 235);
+            color: black;
         }
         button:hover {
             background-color: rgb(191, 191, 191);
@@ -269,7 +270,7 @@
             </form>
         </div>
     </div>
-    <p id="version">V67</p>
+    <p id="version">V68</p>
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
 <script>
     const Chapter1 = {
@@ -815,6 +816,48 @@ const streakLossFeedback = [
         };
         return shuffled;
     };
+    const getSystemInfo = function () {
+        let info = {};
+        const ua = navigator.userAgent
+        let device = "Desktop"
+        if (/tablet|ipad|silk|playbook/i.test(ua) || (/Macintosh/i.test(ua) && navigator.maxTouchPoints > 1)) { //Either it's a tablet or a modern iPad.
+            device = "Tablet"
+        } else if (/ip(hone|od)|android|blackberry|IEmobile/i.test(ua)) {
+            device = "Phone"
+        }
+        info["device"] = device
+        let os = "Unknown";
+        if (/Windows NT/i.test(ua)) {
+            os = "Windows"
+        } else if (/Macintosh/i.test(ua)) {
+            if (navigator.maxTouchPoints > 1) {
+                os = "iPadOS"
+            } else {
+                os = "MacOS"
+            }
+        } else if (/Android/i.test(ua)) {
+            os = "Android"
+        } else if (/iPhone|iPod/i.test(ua)) {
+            os = "iOS"
+        } else if (/iPad/i.test(ua)) {
+            os = "iPadOS"
+        }
+        info["os"] = os
+        let browser = "Chrome" //By default on average it is chrome
+        if (/edg\//i.test(ua)) { //Escapes the /.
+            browser = "Edge"
+        } else if (/OPR|Opera/i.test(ua)) {
+            browser = "Opera"
+        } else if (/Chrome/i.test(ua)) {
+            browser = "Chrome"
+        } else if (/Firefox/i.test(ua)) {
+            browser = "Firefox"
+        } else if (/Safari/i.test(ua)) {
+            browser = "Safari"
+        }
+        info["browser"] = browser
+        return info;
+    }
     const processAnswer = function (answer) {
         answer = answer.toLowerCase()
 
@@ -860,6 +903,10 @@ const streakLossFeedback = [
     }
     const keyboardShortcut = function (event) {
         //This is the function that makes sure that you can press enter and the next question will trigger.
+        //Ban all shortcuts on mobile. MWAHAHAHAHA!
+        if (getSystemInfo().device !== "Desktop") {
+            return;
+        }
         if (operatingSystem === "macOS") {
             //Entirely different setup for macOS. 
             const keyPressed = event.code
@@ -1000,7 +1047,7 @@ const streakLossFeedback = [
                 }
             }
         }
-}
+    }
     const storeInLocalStorage = function () {
         if ($("#content").css("display") === "none") {
             localStorage.setItem("state", "selection")
@@ -1463,7 +1510,9 @@ const streakLossFeedback = [
         $("audio").each(function (index, element) {
             element.volume = 0.2;
         }) //Sets the volume of the audio to 0.2, which is just above "just right".
-
+        if (getSystemInfo().device !== "Desktop") {
+            alert("You are on a non-recommended device. It is strongly recommended to use a laptop instead. A few features, especially keyboard shortcuts, are prone to glitches.")
+        }
         const state = localStorage.getItem("state")
         if (state === "selection" || !state) {
             askUserForCourse()
@@ -1563,8 +1612,7 @@ const streakLossFeedback = [
         }
     });
 /*
-* Confusion alerts
-* Come up with better wrongAnswer sound
+* Add better matching for cases like por que? and porque
 */
 
 
