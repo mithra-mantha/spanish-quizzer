@@ -6,6 +6,16 @@
     <title>Quizzer</title>
     <link rel="icon" href="Spanish Quizzer logo.png" type="image/png">
     <style>
+        :root {
+            --text-color: rgb(0, 0, 0);
+            --quizbox-color: rgb(161, 255, 246);
+            --version-color: rgb(0, 248, 248);
+            --button-bg-color: rgb(161, 236, 255);
+            --keyboard-shortcuts-bg: var(--button-bg-color);
+            --manual-grading-correct-color: limegreen;
+            --manual-grading-wrong-color: rgb(255, 54, 54);
+
+        }
         body {
             text-align: center;
             font-family: Verdana, Roboto, Arial, Calibri, Georgia, sans-serif;
@@ -17,7 +27,7 @@
             top: 50%;
             left: 50%;
             transform: translate(-50%, -50%);
-            background-color: #e5e5e5;
+            background-color: var(--quizbox-color);
             border-radius: 5%;
             z-index: 0;
         }
@@ -123,11 +133,11 @@
             box-sizing: border-box;
             padding: 5px 10px;
             border: 2px solid black;
-            background-color: rgb(235, 235, 235);
+            background-color: var(--button-bg-color);
             color: black;
         }
         button:hover {
-            background-color: rgb(191, 191, 191);
+            filter: brightness(80%);
             cursor: pointer;
         }
         #reset {
@@ -151,7 +161,7 @@
             right: 10px;
             bottom: 10px;
             z-index: 100;
-            background-color: rgb(201, 201, 201);
+            background-color: var(--keyboard-shortcuts-bg);
             font-size: clamp(10px, 0.7dvh + 0.7dvw, 22px);
         }
         #course-disable, #chapter-disable, #topic-disable {
@@ -168,7 +178,7 @@
             position: absolute;
             bottom: 3px;
             left: 2px;
-            color: rgb(171, 171, 171);
+            color: var(--version-color);
         }
     </style>
 </head>
@@ -1283,7 +1293,7 @@ const streakLossFeedback = [
                 $("#next-question").text("Next Question")
             }
             $("#manual-grading").text("I got this wrong");
-            $("#manual-grading").css("color", "red");
+            $("#manual-grading").css("background-color", "var(--manual-grading-wrong-color)");
             $("#manual-grading").on("click", {ogResult: true}, manualGrading);
         } else {
             // Oops. The user got it wrong.
@@ -1347,7 +1357,6 @@ const streakLossFeedback = [
                 $("#correct-answer-sign").text("Correct Answers:")
                 $("#correct-answer").text(answers.join(", "))
             }
-            $("#button-bar").css("display", "none")
             $("#answer-explanation-table").css("display", "table")
             $("#result").css("display", "block")
             //They got it wrong, so they should answer this question again two more times!
@@ -1363,10 +1372,11 @@ const streakLossFeedback = [
                 }
             }
             $("#manual-grading").text("I got this correct")
-            $("#manual-grading").css("color", "green")
+            $("#manual-grading").css("background-color", "var(--manual-grading-correct-color)")
             $("#manual-grading").on("click", {ogResult: false}, manualGrading)
         }
         changeQuestionArray(questionArray) //Permanently modifies the actual array.
+        $("#button-bar").css("display", "none")
         $("#next-question").css("display", "inline-block")
         $("#manual-grading").css("display", "inline-block")
         storeInLocalStorage()
@@ -1619,7 +1629,7 @@ const streakLossFeedback = [
                     $result.css("color", "green")
                     $result.css("display", "block")
                     $("#manual-grading").text("I got this wrong");
-                    $("#manual-grading").css("color", "red");
+                    $("#manual-grading").css("background-color", "var(--manual-grading-wrong-color)");
                     if (getQuestionArray().length <= 1 && questionRep[getCurrentQuestion()] <= 1) {
                         $("#next-question").text("Finish")
                     } else {
@@ -1641,7 +1651,7 @@ const streakLossFeedback = [
                     $("#answer-explanation-table").css("display", "table")
                     $("#result").css("display", "block")
                     $("#manual-grading").text("I got this correct")
-                    $("#manual-grading").css("color", "green")
+                    $("#manual-grading").css("background-color", "var(--manual-grading-correct-color)")
                     $("#manual-grading").on("click", {ogResult: false}, manualGrading)
                     $("#next-question").css("display", "inline-block")
                     $("#manual-grading").css("display", "inline-block")
