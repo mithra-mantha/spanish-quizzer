@@ -1,5 +1,5 @@
 # spanish-quizzer
-This is a Spanish Quizzer to quiz you on your skills. This is strictly for the Senderos Spanish curriculum. Fun fact: All the code here was written 100% without AI(although it was used to debug). It also works 100% without internet.
+This is a Spanish Quizzer to quiz you on your skills for the Senderos Spanish curriculum. Fun fact: All the code here was written 100% without AI(although it was used to debug). It also works 100% without internet.
 
 ## Key features
 You select a course, chapter, and topic from the Senderos Curriculum. It quizzes you multiple times until you consistently get it right. There is a streak counter as well as "I got it right/wrong" buttons in case the system made a mistake. There is also an autosave feature so even if you reload or close the tab your progress is saved. If you want to restart from the beginning, you have to press "reset". It also alerts you if you got the answer confused with another question.
