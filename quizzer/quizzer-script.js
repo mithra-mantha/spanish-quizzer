@@ -497,6 +497,9 @@ const checkAnswer = function (event={}) {
         event.preventDefault();
     };
     userAnswer = ($('input[name="answer"]').val()).trim().toLowerCase()
+    if (userAnswer.length === 0) {
+        return; //Makes sure to not count empty accidental answers.
+    }
     answers = data[courseSelected][chapterSelected][topicSelected][getCurrentQuestion()];
     let $result = $("#result");
     $("#form").css("display", "none");
