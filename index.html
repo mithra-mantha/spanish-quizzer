@@ -5,20 +5,28 @@
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <title>Quizzer Homepage</title>
         <link rel="icon" href="Spanish Quizzer logo.png" type="image/png">
+        <base target="_blank"> <!--Makes all links automatically open in another tab.-->
         <style>
             body {
                 font-size: 1em;
                 background-color: rgb(161, 255, 246);
+                overflow-x: hidden;
+            }
+            body:not(#about, #link) {
+                width: 60%;
             }
             .button-link {
                 display: inline-block;
                 color: black;
-                padding: 10px 20px;
+                padding: 1vh 2vw;
                 text-decoration: none;
                 font-weight: 600;
                 background-color: rgb(45, 209, 250);
                 border: 2px solid black;
                 border-radius: 20%;
+            }
+            .small-button-link {
+                padding: 5px;
             }
             .button-link:hover {
                 filter: brightness(80%);
@@ -30,28 +38,43 @@
                 top: 5%;
                 width: 40%;
             }
-            #about {
-                width: 50%;
+            #link:hover {
+                transform: scale(1.03);
             }
-            div {
-                border-color: black;
-                border-width: 10px;
-                /*border-style: solid;*/
+            #link:active {
+                transform: scale(1.1);
+            }
+            #about {
+                width: 70%;
+            }
+            #form-link {
+                position: absolute;
+                right: 5%;
+                top: 30%;
+                font-size: 1.5rem;
+                border: 3px solid black;
+                padding-left: 10px;
+                padding-right: 10px;
+            }
+            #form-link h2 {
+                color: rgb(255, 50, 50);
             }
         </style>
     </head>
     <body>
-        <div id="about">
+        <header id="about">
         <h1>Spanish quizzer</h1>
+        
         <h2>About</h2>
         <p>
-            This is a study tool created by a student to help study on Senderos. You get to get quizzed directly from the curriculum using the same vocabulary in the textbook. It is strongly recommended to use a laptop, although tablets are okay too. This works 100% without internet once you load the page(yes, every single feature). 
+            This is a study tool created by a student to help study on Senderos. You get to get quizzed directly from the curriculum using the same vocabulary in the textbook. It is <strong>recommended to use a laptop, not a phone</strong>(tablets are okay). This works 100% without internet once you load the page(yes, every single feature). 
         </p>
-        </div>
+        </header>
+        <main>
         <div id="link">
-            <a href="quizzer/" class="button-link">Click here to <br>go to quizzer</a>
+            <a href="quizzer/" class="button-link" title="Click this! What are you waiting for?">Click here to <br>go to quizzer</a>
         </div>
-        <div id="features">
+        <section id="features">
             <h2>How to use</h2>
             <p>
                 How do you use this tool? Just click that button and you'll be there(You can come back to this site by clicking the icon on the quizzer site)! However, there are some things to keep in mind. First of all, this is designed to be on laptops and may or may not work on your phone. There are also some keyboard shortcuts:
@@ -68,20 +91,27 @@
             <p>
                 Also, there's an autosave feature that saves your progress, even if you close the tab. If you want to practice a different set, press "reset" to delete your progress and start from the beginning. It also alerts you if you got something confused with another question.
             </p>
-        </div>
-        <div id="other-resources">
+        </section>
+        <section id="form-link">
+            <h2>IMPORTANT!</h2>
+            <p>Fill out this form if you used the quizzer: <a class="button-link small-button-link" href="https://forms.gle/NDzPw2A4uSAnhX4X9">LINK</a></p>
+        </section>
+        </main>
+        <aside id="other-resources">
             <h2>Other resources</h2>
             <p>These are some other resources that are available.</p>
             <ul>
-                <li><a href="https://docs.google.com/document/d/1qeR-UIYvrjDPS-IgUu3eNLb6aO3g3Lgd8Rz79LvVLtY/edit?tab=t.0#heading=h.bpzzyptcoshk">Spanish 1 Study guides</a></li>
+                <li><a href="https://docs.google.com/document/d/1qeR-UIYvrjDPS-IgUu3eNLb6aO3g3Lgd8Rz79LvVLtY/edit?tab=t.0#heading=h.bpzzyptcoshk" >Spanish 1 Study guides</a></li>
                 <li><a href="https://quizlet.com/user/shreyakarkare/folders/spanish-1a-all-quizlets?i=58gy3d&x=1xqt">Spanish 1A Quizlets</a></li>
                 <li><a href="https://docs.google.com/document/d/1OGFYZL-l8FCCJSc5ED7d-oLZChJ73mkhuFcYQFQ4-NQ/edit?tab=t.0">Spanish 1 Blookets</a></li>
             </ul>
-        </div>
-        <div id="credits-&-contacts">
+        </aside>
+        <footer id="credits-&-contacts">
             <h2>Contacts:</h2>
             <p>
-                Contact me at mm8753@pleasantonusd.net or mithra.mantha@gmail.com for feedback or questions. If there is a serious issue/bug with the quizzer, please tell me what device you're using(phone/tablet/laptop) and what browser(Chrome, Safari, Edge, etc.).
+                <address>
+                Fill out this <a class="button-link small-button-link" href="https://forms.gle/ERoVYs6Lpt8CegR39">form</a> for major feedback. For any other questions, <a href="mailto:mithra.mantha@gmail.com, mm8753@pleasantonusd.net?subject=Spanish%20Quizzer">email me here</a>. <!--Okay, to be honest that link looks a bit ugly. Who invented %20 as a space?-->
+                </address>
             </p>
             <h2>Credits:</h2>
             <p>
@@ -89,6 +119,6 @@
                 <br>
                 <strong>Shreya Karkare/Ritika Iyengar/Seyeon</strong>: Created extra resources
             </p>
-        </div>
+        </footer>
     </body>
 </html>
