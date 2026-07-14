@@ -685,9 +685,9 @@ const setUpQuestion = function (event={}) {
         const question = questionArray[0]
         changeCurrentQuestion(question)
         //Look through questionRep and set the cap at 5.
-        for (question in questionRep) {
-            if (questionRep[question] > 5) {
-                questionRep[question] = 5
+        for (const q in questionRep) {
+            if (questionRep[q] > 5) {
+                questionRep[q] = 5
             }
         }
         //Now set up the physical page
