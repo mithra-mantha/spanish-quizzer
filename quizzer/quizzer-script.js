@@ -682,15 +682,21 @@ const setUpQuestion = function (event={}) {
         }, 8000)
         return;
     } else {
-    const question = questionArray[0]
-    changeCurrentQuestion(question)
-    //Now set up the physical page
-    $("#question").text(question);
-    $("#form").css("display", "block");
-    $("[name='answer']").val("");//sets the input box to empty
-    ($('[name="answer"]')[0]).focus();
-    ($('[name="answer"]')[0]).setSelectionRange(0, 0);
-    //Autoselects the input box
+        const question = questionArray[0]
+        changeCurrentQuestion(question)
+        //Look through questionRep and set the cap at 5.
+        for (question in questionRep) {
+            if (questionRep[question] > 5) {
+                questionRep[question] = 5
+            }
+        }
+        //Now set up the physical page
+        $("#question").text(question);
+        $("#form").css("display", "block");
+        $("[name='answer']").val("");//sets the input box to empty
+        ($('[name="answer"]')[0]).focus();
+        ($('[name="answer"]')[0]).setSelectionRange(0, 0);
+        //Autoselects the input box
     }
     storeInLocalStorage()
 }
