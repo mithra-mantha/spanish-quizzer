@@ -808,6 +808,9 @@ $(document).ready(function() {
         event.preventDefault()
         alert("Nice try! You have to type the answer, not copy and paste it.")
     })
+    $(document).on("dragstart", function (event) {
+        event.preventDefault()
+    })
     const state = localStorage.getItem("state")
     if (state === "selection" || !state) {
         askUserForCourse()
@@ -858,12 +861,6 @@ $(document).ready(function() {
             $("[name='answer']").val("");//sets the input box to empty
             ($('[name="answer"]')[0]).focus();
             ($('[name="answer"]')[0]).setSelectionRange(0, 0);
-            setTimeout(function () {
-                if (confirm(`Would you like to restart and lose all your progress? 
-    Click "OK" to restart and "Cancel" to continue where you left off.`)) {
-                    reset()
-                } //That way the browser loads everything BEFORE this.
-            }, 0)
         } else if (state === "answer") {
             let $result = $("#result");
             let processedAnswers = [];
@@ -907,14 +904,8 @@ $(document).ready(function() {
                 $("#next-question").css("display", "inline-block")
                 $("#manual-grading").css("display", "inline-block")
             }
-            setTimeout(function () {
-                if (confirm(`Would you like to restart and lose all your progress? 
-    Click "OK" to restart and "Cancel" to continue where you left off.`)) {
-                    reset()
-                }
-            }, 0) //That way the browser loads everything BEFORE this.
         } else {
-            console.error("Error Document.ready function. LocalStorageData state neither question nor answer nor selection nor null/undefined.");
+            throw new Error("Error Document.ready function. LocalStorageData state neither question nor answer nor selection nor null/undefined.");
         }
     }
 });
