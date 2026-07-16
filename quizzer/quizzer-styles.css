@@ -11,6 +11,9 @@
 body {
     text-align: center;
     font-family: Verdana, Roboto, Arial, Calibri, Georgia, sans-serif;
+    -webkit-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
 }
 #quiz-box {
     width: 90%;

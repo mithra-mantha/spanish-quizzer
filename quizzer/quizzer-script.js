@@ -801,6 +801,9 @@ $(document).ready(function() {
     if (getSystemInfo().device !== "Desktop") {
         alert("You are on a non-recommended device. It is strongly recommended to use a laptop instead. A few features, especially keyboard shortcuts, are prone to glitches.")
     }
+    $(document).on("cut", function (event) {
+        event.preventDefault()
+    })
     $(document).on("copy", function (event) {
         event.preventDefault()
     })
