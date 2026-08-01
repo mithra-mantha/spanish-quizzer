@@ -307,11 +307,11 @@ const keyboardShortcut = function (event) {
 }
 const storeInLocalStorage = function () {
     if ($("#content").css("display") === "none") {
-        localStorage.setItem("state", "selection")
+        localStorage.setItem("spanish-quizzer-state", "selection")
     } else if ($("#form").css("display") === "none") {
-        localStorage.setItem("state", "answer")
+        localStorage.setItem("spanish-quizzer-state", "answer")
     } else {
-        localStorage.setItem("state", "question")
+        localStorage.setItem("spanish-quizzer-state", "question")
     }
     /* Why does everything start with "spanish-quizzer-"?
     localStorage is stored in the origin, the first part of the url encompassing the mydomain.extension.
@@ -356,6 +356,7 @@ const getLocalStorage = function () {
         if (Object.values(storage).includes(null)) {
             return {state:"selection"}
         }
+        return storage;
     } catch {
         return {
             state:"selection"
@@ -847,7 +848,7 @@ $(document).ready(function() {
     $(document).on("dragstart", function (event) {
         event.preventDefault()
     })
-    const state = localStorage.getItem("state")
+    const state = getLocalStorage().state
     if (state === "selection" || !state) {
         askUserForCourse()
         return;
