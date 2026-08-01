@@ -164,10 +164,6 @@ const keyboardShortcut = function (event) {
     if (getSystemInfo().device !== "Desktop") {
         return;
     }
-    // Just in case they're a sneaky ipad...
-    if (navigator.maxTouchPoints > 1) {
-        return;
-    }
     if (operatingSystem === "macOS") {
         //Entirely different setup for macOS. 
         const keyPressed = event.code

@@ -175,3 +175,6 @@ button:hover {
     left: 2px;
     color: var(--version-color);
 }
+summary:hover {
+    cursor: pointer;
+}
