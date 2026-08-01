@@ -1,0 +1,12 @@
+{
+	"folders": [
+		{
+			"name": "spanish-quizzer",
+			"path": "../../mithra-projects/spanish-quizzer"
+		},
+		{
+			"name": "quizzer",
+			"path": "../../mithra-projects/spanish-quizzer/quizzer"
+		}
+	]
+}

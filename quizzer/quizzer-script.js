@@ -1,3 +1,4 @@
+"use strict";
 /*
 Welcome to the brain of the spanish quizzer! Note that the "data" object is a global variable and so are correctFeedback, wrongFeedback and streakLossFeedback because they are in data.js which is loaded in the html before this script is. jQuery is loaded in here too.
 */
@@ -141,14 +142,14 @@ const processAnswer = function (answer, removePunctuation=true, removeSpaces=tru
     return answer
 }
 const insertChar = function (char, deletePrevious=false) {
-    const domEl = $('[name="answer"]')[0]
+    const domEl = $("#answer-input")[0]
     if ($(domEl).css("display") === "none") {
-        return 0; //If the domEl is hidden why add something to it?
+        return; //If the domEl is hidden why add something to it?
     }
     const startPos = domEl.selectionStart
     const endPos = domEl.selectionEnd
     const currentVal = $(domEl).val()
-    const newVal = currentVal.slice(0, deletePrevious ? startPos - 1 : startPos) + char + currentVal.slice(endPos)
+    const newVal = currentVal.slice(0, deletePrevious ? Math.max(startPos - 1, 0) : startPos) + char + currentVal.slice(endPos)
     $(domEl).val(newVal)
     if (deletePrevious) {
         domEl.setSelectionRange(startPos, startPos)
@@ -161,6 +162,10 @@ const keyboardShortcut = function (event) {
     //This is the function that makes sure that you can press enter and the next question will trigger.
     //Ban all shortcuts on mobile. MWAHAHAHAHA!
     if (getSystemInfo().device !== "Desktop") {
+        return;
+    }
+    // Just in case they're a sneaky ipad...
+    if (navigator.maxTouchPoints > 1) {
         return;
     }
     if (operatingSystem === "macOS") {
@@ -234,7 +239,7 @@ const keyboardShortcut = function (event) {
                         $("#next-question").trigger("click")
                     } else {
                         //Check the answer, but prevent spamming.
-                        if ($('[name="answer"]').val()) {
+                        if ($("#answer-input").val()) {
                             //Uses truthy/falsy because if it is an empty string then don't spam.
                             $("#form").trigger("submit")
                         }
@@ -283,7 +288,7 @@ const keyboardShortcut = function (event) {
                         $("#next-question").trigger("click");
                     } else {
                         //Check the answer, but prevent spamming.
-                        if ($('[name="answer"]').val()) {
+                        if ($("#answer-input").val()) {
                             //Uses truthy/falsy because if it is an empty string then don't spam.
                             $("#form").trigger("submit")
                         }
@@ -312,46 +317,76 @@ const storeInLocalStorage = function () {
     } else {
         localStorage.setItem("state", "question")
     }
-    localStorage.setItem("courseSelected", courseSelected)
-    localStorage.setItem("chapterSelected", chapterSelected)
-    localStorage.setItem("topicSelected", topicSelected)
-    localStorage.setItem("answers", JSON.stringify(answers))
-    localStorage.setItem("userAnswer", userAnswer)
-    localStorage.setItem("questionRep", JSON.stringify(questionRep))
-    localStorage.setItem("streak", JSON.stringify(streak))
-    localStorage.setItem("oldStreak", JSON.stringify(oldStreak))
-    localStorage.setItem("currentQuestion", getCurrentQuestion())
-    localStorage.setItem("questionArray", JSON.stringify(getQuestionArray()))
-    localStorage.setItem("totalQuestions", String(totalQuestions))
-    localStorage.setItem("questionsCorrect", String(questionsCorrect))
-    localStorage.setItem("insertLocations", JSON.stringify(insertLocations))
-    localStorage.setItem("$resultText", $("#result").text())
+    /* Why does everything start with "spanish-quizzer-"?
+    localStorage is stored in the origin, the first part of the url encompassing the mydomain.extension.
+    Which means if I host something else on the same thing, I might override THEIR localStorage or vice versa.
+    */
+
+    localStorage.setItem("spanish-quizzer-courseSelected", courseSelected)
+    localStorage.setItem("spanish-quizzer-chapterSelected", chapterSelected)
+    localStorage.setItem("spanish-quizzer-topicSelected", topicSelected)
+    localStorage.setItem("spanish-quizzer-answers", JSON.stringify(answers))
+    localStorage.setItem("spanish-quizzer-userAnswer", userAnswer)
+    localStorage.setItem("spanish-quizzer-questionRep", JSON.stringify(questionRep))
+    localStorage.setItem("spanish-quizzer-streak", JSON.stringify(streak))
+    localStorage.setItem("spanish-quizzer-oldStreak", JSON.stringify(oldStreak))
+    localStorage.setItem("spanish-quizzer-currentQuestion", getCurrentQuestion())
+    localStorage.setItem("spanish-quizzer-questionArray", JSON.stringify(getQuestionArray()))
+    localStorage.setItem("spanish-quizzer-totalQuestions", String(totalQuestions))
+    localStorage.setItem("spanish-quizzer-questionsCorrect", String(questionsCorrect))
+    localStorage.setItem("spanish-quizzer-insertLocations", JSON.stringify(insertLocations))
+    localStorage.setItem("spanish-quizzer-$resultText", $("#result").text())
     //This stores EVERYTHING in localstorage, useful or not.
 }
 const getLocalStorage = function () {
     try {
-        return {
-            "state":localStorage.getItem("state"),
-            "courseSelected":localStorage.getItem("courseSelected"),
-            "chapterSelected":localStorage.getItem("chapterSelected"),
-            "topicSelected":localStorage.getItem("topicSelected"),
-            "answers":JSON.parse(localStorage.getItem("answers")),
-            "userAnswer":localStorage.getItem("userAnswer"),
-            "questionRep":JSON.parse(localStorage.getItem("questionRep")),
-            "streak":JSON.parse(localStorage.getItem("streak")),
-            "oldStreak":JSON.parse(localStorage.getItem("oldStreak")),
-            "currentQuestion":localStorage.getItem("currentQuestion"),
-            "questionArray":JSON.parse(localStorage.getItem("questionArray")),
-            "totalQuestions":Number(localStorage.getItem("totalQuestions")),
-            "questionsCorrect":Number(localStorage.getItem("questionsCorrect")),
-            "insertLocations":JSON.parse(localStorage.getItem("insertLocations")),
-            "$resultText":localStorage.getItem("$resultText"),
+        const storage =  {
+            "state":localStorage.getItem("spanish-quizzer-state"),
+            "courseSelected":localStorage.getItem("spanish-quizzer-courseSelected"),
+            "chapterSelected":localStorage.getItem("spanish-quizzer-chapterSelected"),
+            "topicSelected":localStorage.getItem("spanish-quizzer-topicSelected"),
+            "answers":JSON.parse(localStorage.getItem("spanish-quizzer-answers")),
+            "userAnswer":localStorage.getItem("spanish-quizzer-userAnswer"),
+            "questionRep":JSON.parse(localStorage.getItem("spanish-quizzer-questionRep")),
+            "streak":JSON.parse(localStorage.getItem("spanish-quizzer-streak")),
+            "oldStreak":JSON.parse(localStorage.getItem("spanish-quizzer-oldStreak")),
+            "currentQuestion":localStorage.getItem("spanish-quizzer-currentQuestion"),
+            "questionArray":JSON.parse(localStorage.getItem("spanish-quizzer-questionArray")),
+            "totalQuestions":Number(localStorage.getItem("spanish-quizzer-totalQuestions")),
+            "questionsCorrect":Number(localStorage.getItem("spanish-quizzer-questionsCorrect")),
+            "insertLocations":JSON.parse(localStorage.getItem("spanish-quizzer-insertLocations")),
+            "$resultText":localStorage.getItem("spanish-quizzer-$resultText"),
+        }
+        if (Object.values(storage).includes(null)) {
+            return {state:"selection"}
         }
     } catch {
         return {
             state:"selection"
         }
     }
+}
+const clearLocalStorage = function () {
+    /* 
+    Why can't I use localStorage.clear()?
+    localStorage is stored in the origin, the first part of the url encompassing the mydomain.extension.
+    Which means if I host something else on the same thing, I might delete THEIR localStorage or vice versa. This provides a degree of security because if they are far less likely to have a key called "spanish-quizzer-answers" than "answers".
+    */
+    localStorage.removeItem("spanish-quizzer-state")
+    localStorage.removeItem("spanish-quizzer-courseSelected")
+    localStorage.removeItem("spanish-quizzer-chapterSelected")
+    localStorage.removeItem("spanish-quizzer-topicSelected")
+    localStorage.removeItem("spanish-quizzer-answers")
+    localStorage.removeItem("spanish-quizzer-userAnswer")
+    localStorage.removeItem("spanish-quizzer-questionRep")
+    localStorage.removeItem("spanish-quizzer-streak")
+    localStorage.removeItem("spanish-quizzer-oldStreak")
+    localStorage.removeItem("spanish-quizzer-currentQuestion")
+    localStorage.removeItem("spanish-quizzer-questionArray")
+    localStorage.removeItem("spanish-quizzer-totalQuestions")
+    localStorage.removeItem("spanish-quizzer-questionsCorrect")
+    localStorage.removeItem("spanish-quizzer-insertLocations")
+    localStorage.removeItem("spanish-quizzer-$resultText")
 }
 const shiftAll = function () {
     //So that the user can input uppercase and lowercase special symbols.
@@ -474,7 +509,7 @@ const reset = function () {
     $("*").off(); ///Just in case destroys any remaining event listeners.
     $("#reset").on("click", resetButton); //Don't destroy the event listener for resetButton!!!
     //Clear localStorage.
-    localStorage.clear()
+    clearLocalStorage();
     // Make sure to add the default required element though.
     $("#course-selection").append("<option value='' disabled selected hidden>Please select an option</option>");
     $("#chapter-selection").append("<option value='' disabled selected hidden>Please select an option</option>");
@@ -496,7 +531,7 @@ const checkAnswer = function (event={}) {
     if (Object.keys(event).length !== 0) {
         event.preventDefault();
     };
-    userAnswer = ($('input[name="answer"]').val()).trim().toLowerCase()
+    userAnswer = ($("#answer-input").val()).trim().toLowerCase()
     if (userAnswer.length === 0) {
         return; //Makes sure to not count empty accidental answers.
     }
@@ -690,12 +725,11 @@ const setUpQuestion = function (event={}) {
                 questionRep[q] = 5
             }
         }
-        //Now set up the physical page
         $("#question").text(question);
         $("#form").css("display", "block");
-        $("[name='answer']").val("");//sets the input box to empty
-        ($('[name="answer"]')[0]).focus();
-        ($('[name="answer"]')[0]).setSelectionRange(0, 0);
+        $("#answer-input").val("");//sets the input box to empty
+        ($("#answer-input")[0]).focus();
+        ($("#answer-input")[0]).setSelectionRange(0, 0);
         //Autoselects the input box
     }
     storeInLocalStorage()
@@ -718,9 +752,9 @@ const setUp = function (event) {
     changeCurrentQuestion(question)
     $("#question").text(question)
     $("#form").css("display", "block")
-    $("[name='answer']").val("");
-    ($('[name="answer"]')[0]).focus();
-    ($('[name="answer"]')[0]).setSelectionRange(0, 0); //autoselect
+    $("#answer-input").val("");
+    ($("#answer-input")[0]).focus();
+    ($("#answer-input")[0]).setSelectionRange(0, 0); //autoselect
     questionRep = {}
     for (let i = 0; i < questionArray.length; i++) {
         const question = questionArray[i]
@@ -730,7 +764,7 @@ const setUp = function (event) {
 
     $(document).on("click", ".char", function () {
             const char = $(this).text()
-            const domEl = $('[name="answer"]')[0]
+            const domEl = $("#answer-input")[0]
             const startPos = domEl.selectionStart
             const endPos = domEl.selectionEnd
             const currentVal = $(domEl).val()
@@ -799,7 +833,10 @@ $(document).ready(function() {
         element.volume = 0.2;
     }) //Sets the volume of the audio to 0.2, which is just above "just right".
     if (getSystemInfo().device !== "Desktop") {
-        alert("You are on a non-recommended device. It is strongly recommended to use a laptop instead. A few features, especially keyboard shortcuts, are prone to glitches.")
+        $("#keyboard-shortcuts")[0].remove()
+        // Gives the browser some time to remove the keyboard shortcuts so that they don't even exist in memory.
+        setTimeout(function () {
+        alert("You are on a non-recommended device. It is strongly recommended to use a laptop instead.")}, 50)
     }
     $(document).on("cut", function (event) {
         event.preventDefault()
@@ -842,7 +879,7 @@ $(document).ready(function() {
         //Add keyboard shortcuts
         $(document).on("click", ".char", function () {
                 const char = $(this).text()
-                const domEl = $('[name="answer"]')[0]
+                const domEl = $("#answer-input")[0]
                 const startPos = domEl.selectionStart
                 const endPos = domEl.selectionEnd
                 const currentVal = $(domEl).val()
@@ -861,9 +898,9 @@ $(document).ready(function() {
             $("#button-bar").css("display", "")
             $("#question").text(getCurrentQuestion());
             $("#form").css("display", "block");
-            $("[name='answer']").val("");//sets the input box to empty
-            ($('[name="answer"]')[0]).focus();
-            ($('[name="answer"]')[0]).setSelectionRange(0, 0);
+            $("#answer-input").val("");//sets the input box to empty
+            ($("#answer-input")[0]).focus();
+            ($("#answer-input")[0]).setSelectionRange(0, 0);
         } else if (state === "answer") {
             let $result = $("#result");
             let processedAnswers = [];
