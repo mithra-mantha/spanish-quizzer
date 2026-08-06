@@ -82,6 +82,7 @@ body {
     display: none;
 }
 #streak {
+    display: none;
     position: absolute;
     text-align: left;
     margin-left: 90px;
@@ -136,6 +137,7 @@ button:hover {
     cursor: pointer;
 }
 #reset {
+    display: none;
     position: absolute;
     right: 20px;
     top: 20px;
@@ -158,6 +160,7 @@ button:hover {
     z-index: 100;
     background-color: var(--keyboard-shortcuts-bg);
     font-size: clamp(10px, 0.7dvh + 0.7dvw, 22px);
+    display: none;
 }
 #course-disable, #chapter-disable, #topic-disable {
     border: none;
@@ -177,4 +180,10 @@ button:hover {
 }
 summary:hover {
     cursor: pointer;
+}
+#start {
+    display: none;
+}
+#start-button {
+    font-size: 2em;
 }

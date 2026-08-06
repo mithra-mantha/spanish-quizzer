@@ -511,7 +511,11 @@ const reset = function () {
     $("#course-selection").append("<option value='' disabled selected hidden>Please select an option</option>");
     $("#chapter-selection").append("<option value='' disabled selected hidden>Please select an option</option>");
     $("#topic-selection").append("<option value='' disabled selected hidden>Please select an option</option>");
-    askUserForCourse();
+    $("#start").css("display", "block")
+    $("#selection").css("display", "none")
+    $("#streak").css("display", "none")
+    $("#keyboard-shortcuts").css("display", "none")
+    $("#start-button").one("click", askUserForCourse)
 }
 const resetButton = function () {
     if (!getQuestionArray()[0] || $("#content").css("display") === "none") {
@@ -740,7 +744,9 @@ const setUp = function (event) {
     changeQuestionArray(questionArray)
     $("#selection").css("display", "none")
     $("#content").css("display", "revert")
-    
+    $("#reset").css("display", "revert")
+    $("#keyboard-shortcuts").css("display", "revert")
+    $("#streak").css("display", "revert");
     $('#form').on("submit", checkAnswer)
     $("#next-question").on("click", setUpQuestion)
     $("#shift").on("click", shiftAll);
@@ -806,7 +812,10 @@ const askUserForChapter = function (event) {
     $("#chapter-selection-form").one("submit", askUserForTopic)
 }
 const askUserForCourse = function () {
+    $("#selection").css("display", "")
     $("#content").css("display", "none");
+    $("#start").css("display", "none")
+    $("#reset").css("display", "revert")
     storeInLocalStorage()
     //Now fill the course selection with what courses are currently available.
     const courses = Object.keys(data)
@@ -851,7 +860,9 @@ $(document).ready(function() {
     const localStorageData = getLocalStorage()
     const state = localStorageData.state
     if (state === "selection" || !state) {
-        askUserForCourse()
+        $("#start").css("display", "block")
+        $("#start-button").one("click", askUserForCourse)
+        $("#selection").css("display", "none")
         return;
     } else {
         courseSelected = localStorageData.courseSelected;
@@ -867,6 +878,9 @@ $(document).ready(function() {
         insertLocations = localStorageData.insertLocations
         $("#content").css("display", "revert");
         $("#selection").css("display", "none")
+        $("#keyboard-shortcuts").css("display", "revert")
+        $("#streak").css("display", "revert")
+        $("#reset").css("display", "revert")
         changeCurrentQuestion(localStorageData.currentQuestion)
         changeQuestionArray(localStorageData.questionArray)
         $('#form').on("submit", checkAnswer)
