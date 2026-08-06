@@ -848,12 +848,12 @@ $(document).ready(function() {
     $(document).on("dragstart", function (event) {
         event.preventDefault()
     })
-    const state = getLocalStorage().state
+    const localStorageData = getLocalStorage()
+    const state = localStorageData.state
     if (state === "selection" || !state) {
         askUserForCourse()
         return;
     } else {
-        const localStorageData = getLocalStorage()
         courseSelected = localStorageData.courseSelected;
         chapterSelected = localStorageData.chapterSelected
         topicSelected = localStorageData.topicSelected
