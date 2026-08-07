@@ -1,117 +1,129 @@
 <!DOCTYPE html>
 <html lang="en">
-    <head>
-        <meta charset="UTF-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <title>Quizzer Homepage</title>
-        <link rel="icon" href="Spanish Quizzer logo.png" type="image/png">
-        <base target="_blank"> <!--Makes all links automatically open in another tab.-->
-        <style>
-            body {
-                font-size: 1em;
-                background-color: rgb(161, 255, 246);
-                overflow-x: hidden;
-            }
-            body:not(#about, #link) {
-                width: 60%;
-            }
-            .button-link {
-                display: inline-block;
-                color: black;
-                padding: 1vh 2vw;
-                text-decoration: none;
-                font-weight: 600;
-                background-color: rgb(45, 209, 250);
-                border: 2px solid black;
-                border-radius: 20%;
-            }
-            .small-button-link {
-                padding: 5px;
-            }
-            .button-link:hover {
-                filter: brightness(80%);
-            }
-            .button-link:focus-visible {
-                border-width: 5px;
-            }
-            #link {
-                position: absolute;
-                left: 60%;
-                font-size: 4vw;
-                top: 5%;
-                width: 40%;
-            }
-            #link:hover {
-                transform: scale(1.03);
-            }
-            #link:active {
-                transform: scale(1.1);
-            }
-            #about {
-                width: 70%;
-            }
-            summary {
-                cursor: pointer;
-            }
-        </style>
-    </head>
-    <body>
-        <header id="about">
-        <h1>Spanish quizzer</h1>
-        
-        <h2>About</h2>
-        <p>
-            This is a study tool created by a student to help study on Senderos. You get to get quizzed directly from the curriculum using the same vocabulary in the textbook. It is <strong>recommended to use a laptop, not a phone</strong>(tablets are okay). This works 100% without internet once you load the page(yes, every single feature). 
-        </p>
-        </header>
-        <main>
-        <div id="link">
-            <a href="quizzer/" class="button-link" title="Click this! What are you waiting for?">Click here to <br>go to quizzer</a>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quizzer</title>
+    <base target="_blank">
+    <link rel="icon" href="assets/logo.png" type="image/png">
+    <link rel="stylesheet" href="quizzer-styles.css">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js" defer></script>
+    <script src="data.js" defer></script>
+    <script src="quizzer-script.js" defer></script>
+</head>
+<body>
+    <img id="logo" src="assets/logo.png" width="50px" alt="Spanish quizzer logo">
+    <button id="reset" type="button" title="Click this to reset your progress">Reset ⟳</button>
+    <img id="flaming-icon" src="assets/flaming-streak-icon.png" title="Look at your amazing streak!" alt="Flaming streak icon" width="70px">
+    <p id="streak" aria-live="polite">Streak: <span id="streak-num">0</span></p>
+    <audio id="correct-sound" src="assets/correct-sound.mp3" preload="auto"></audio>
+    <audio id="wrong-sound" src="assets/wrong-sound.mp3" preload="auto"></audio>
+    <details id="keyboard-shortcuts" open>
+    <summary><h2>
+        Keyboard shortcuts
+    </h2></summary> 
+    <p>
+        <strong>Alt + A, E, I, O, U</strong> → á, é, í, ó, ú <br>
+        <strong>Alt + N</strong> → ñ <br>
+        <strong>Alt + Y</strong> → ü <br>
+        <strong>Alt + Q</strong> → Next question/submit answer <br>
+        <strong>Alt + M</strong> → I got this question correct/wrong <br>
+        For more information visit the <a href="../">homepage</a>.
+    </p>
+    </details>
+    <div id="quiz-box" data-current-question="" data-question-array="">
+        <div id="content">
+            <h1 id="quiz-title">Quiz Mode</h1>
+            <h1 id="question" translate="no"></h1>
+            <div id="button-bar">
+                <h2 id="special-characters-sign">Special characters:</h2>
+                <button id="shift" type="button">shift</button>
+                <button class="shift char" type="button" title="Shortcut: Alt+A">á</button>
+                <button class="shift char" type="button" title="Shortcut: Alt+E">é</button>
+                <button class="shift char" type="button" title="Shortcut: Alt+I">í</button>
+                <button class="shift char" type="button" title="Shortcut: Alt+O">ó</button>
+                <button class="shift char" type="button" title="Shortcut: Alt+U">ú</button>
+                <button class="shift char" type="button" title="Shortcut: Alt+Y">ü</button>
+                <button class="shift char" type="button" title="Shortcut: Alt+N">ñ</button>
+                <button class="char" type="button" title="Shortcut: Alt+!">¡</button>
+                <button class="char" type="button" title="Shortcut: Alt+?">¿</button>
+            </div>
+            <div id="credits">
+                <h2>Credits:</h2>
+                <p>Made by Mithra Mantha</p>
+            </div>
+            <img id="confetti" alt="Confetti falling" src="assets/confetti-launcher.gif" width="30%">
+            <form id="form">
+                <label for="answer-input" class="answer-form" id="label">Your Answer:</label><br>
+                <input type="text" id="answer-input" class="answer-form" name="answer" autocapitalize="off" autocomplete="off" autocorrect="off" spellcheck="false" placeholder="Type your answer here">
+                <button type="submit" class="answer-form" title="Shortcut: Alt+Q">Submit</button>
+            </form>
+            <h1 id="result" class="answer-explanation">ERROR! ERROR! ERROR!</h1>
+            <table id="answer-explanation-table">
+                <thead>
+                    <tr>
+                        <th class="answer-explanation user-answer">You answered:</th>
+                        <th class="answer-explanation correct-answer" id="correct-answer-sign">Correct Answer:</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td class="answer-explanation user-answer" id="user-answer">Answer</td>
+                        <td class="answer-explanation correct-answer" id="correct-answer">Real Answer</td>
+                    </tr>
+                </tbody>
+            </table>
+            <button type="submit" id="next-question" title="Shortcut: Alt+Q">Next Question</button>
+            <br>
+            <button type="button" id="manual-grading" title="Shortcut: Alt+M"></button>
         </div>
-        <section id="features">
-            <h2>How to use</h2>
-            <p>
-                How do you use this tool? Just click that button and you'll be there(You can come back to this site by clicking the icon on the quizzer site)! However, there are some things to keep in mind. First of all, this is designed to be on laptops and may or may not work on your phone.
-            </p>
-            <details open>
-                <summary>Keyboard Shortcuts:</summary>
-                <ul>
-                    <li><strong>Alt + Vowel</strong>(a, e, i, o, u): Inputs the accented form into the textbox. The shift key can be used to make it uppercase.</li>
-                    <li><strong>Alt + N</strong>: Inputs an <strong>ñ</strong> into the textbox. The shift can also be used to make this uppercase.</li>
-                    <li><strong>Alt + Y</strong>: Inputs a <strong>ü</strong> into the textbox. While this symbol is relatively rare in Spanish, I put it there just in case. The shift key can be used to make it uppercase.</li>
-                    <li><strong>Alt + !</strong>: Inputs an upside down exclamation mark.</li>
-                    <li><strong>Alt + ?</strong>: Inputs an upside down question mark.</li>
-                    <li><strong>Alt + Q</strong>: Either submits the question(if the question hasn't been answered yet) or moves on to the next question(if the result came out).</li>
-                    <li><strong>Alt + M</strong>: Works like the "I got this correct/wrong" button.</li>
-                </ul>
-            </details>
-            <p>
-                Also, there's an autosave feature that saves your progress, even if you close the tab. If you want to practice a different set, press "reset" to delete your progress and start from the beginning. It also alerts you if you got something confused with another question.
-            </p>
-        </section>
-        </main>
-        <aside id="other-resources">
-            <h2>Other resources</h2>
-            <p>These are some other resources that are available.</p>
-            <ul>
-                <li><a href="https://docs.google.com/document/d/1qeR-UIYvrjDPS-IgUu3eNLb6aO3g3Lgd8Rz79LvVLtY/edit?tab=t.0#heading=h.bpzzyptcoshk" >Spanish 1 Study guides</a></li>
-                <li><a href="https://quizlet.com/user/shreyakarkare/folders/spanish-1a-all-quizlets?i=58gy3d&x=1xqt">Spanish 1A Quizlets</a></li>
-                <li><a href="https://docs.google.com/document/d/1OGFYZL-l8FCCJSc5ED7d-oLZChJ73mkhuFcYQFQ4-NQ/edit?tab=t.0">Spanish 1 Blookets</a></li>
-            </ul>
-        </aside>
-        <footer id="credits-&-contacts">
-            <h2>Contacts:</h2>
-            <p>
-                Fill out this <a class="button-link small-button-link" href="https://forms.gle/ERoVYs6Lpt8CegR39">form</a> for major feedback. For any other questions, <a href="mailto:mithra.mantha@gmail.com, mm8753@pleasantonusd.net?subject=Spanish%20Quizzer">email me here</a>. <!--Okay, to be honest that link looks a bit ugly. Who invented %20 as a space?-->
-            </p>
-            <h2>Credits:</h2>
-            <p>
-                <strong>Mithra Mantha</strong>: Wrote code for quizzer and this page(no AI-generated code)
+        <div id="selection">
+            <form id="course-selection-form">
+                <fieldset id="course-disable">
+                <label for="course-selection" class="course-selection">Select the course:</label>
                 <br>
-                <strong>Shreya Karkare/Ritika Iyengar/Seyeon</strong>: Created extra resources
-            </p>
-        </footer>
-            <script data-goatcounter="https://mithra-mantha.goatcounter.com/count"
+                <select name="course" id="course-selection" class="course-selection" required>
+                    <option value="" disabled selected hidden>Please select an option</option>
+                </select>
+                <br>
+                <button type="submit" class="course-selection">Select</button>
+                </fieldset>
+            </form>
+            <form id="chapter-selection-form">
+                <fieldset id="chapter-disable">
+                <label for="chapter-selection" class="chapter-selection">Select the chapter:</label>
+                <br>
+                <select name="chapter" id="chapter-selection" class="chapter-selection" required>
+                    <option value="" disabled selected hidden>Please select an option</option>
+                </select>
+                <br>
+                <button type="submit" class="chapter-selection">Select</button>
+                </fieldset>
+            </form>
+            <form id="topic-selection-form">
+                <fieldset id="topic-disable">
+                <label for="topic-selection" class="topic-selection">Select the topic:</label>
+                <br>
+                <select name="topic" id="topic-selection" class="topic-selection" required>
+                    <option value="" disabled selected hidden>Please select an option</option>
+                </select>
+                <br>
+                <button type="submit" class="topic-selection">Submit</button>
+                </fieldset>
+            </form>
+        </div>
+        <div id="start">
+            <h1>Ready to begin?</h1>
+            <button id="start-button">Select your topic</button>
+            <p>Your progress will be saved, even if you exit/reload the page later. If you want to restart from the beginning, press "reset".</p>
+            <div id="contacts">
+                <h2>Contacts:</h2>
+                <p>Contact me at <a href="mailto:mithra.mantha@gmail.com, mm8753@pleasantonusd.net?subject=Spanish%20Quizzer">mithra.mantha@gmail.com</a> for any questions or feedback.</p>
+            </div>
+        </div>
+    </div>
+    <p id="version">V93</p>
+    <script data-goatcounter="https://mithra-mantha.goatcounter.com/count"
         async src="https://gc.zgo.at/count.js"></script> <!--This is to count how many viewers go on the site...it does NOT track them across the web, it just tells me how many people and from what countries and browsers.-->
-    </body>
+</body>
 </html>

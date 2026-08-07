@@ -706,6 +706,7 @@ const setUpQuestion = function (event={}) {
         $("#streak").css("display", "none")
         $("#flaming-icon").css("display", "none")
         $("#keyboard-shortcuts").css("display", "none")
+        $("#credits").css("display", "revert")
         localStorage.clear()
         setTimeout(function () {
             $("#confetti").css("display", "inline")

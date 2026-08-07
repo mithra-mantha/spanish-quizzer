@@ -111,14 +111,11 @@ body {
 .char, #shift {
     font-size: 1.5em;
 }
-#link-to-home {
+#logo {
     position: absolute;
     left: 10px;
     top: 10px;
     z-index: 5;
-}
-#link-to-home:hover {
-    cursor: pointer;
 }
 #confetti {
     display: none;
@@ -142,12 +139,6 @@ button:hover {
     right: 20px;
     top: 20px;
     z-index: 6;
-}
-#logo {
-    filter: brightness(100%);
-}
-#logo:hover {
-    filter: brightness(80%);
 }
 #keyboard-shortcuts {
     border: 3px solid black;
@@ -186,4 +177,13 @@ summary:hover {
 }
 #start-button {
     font-size: 2em;
+}
+#contacts {
+    position: absolute;
+    bottom: 30px;
+    left: 50%;
+    transform: translateX(-50%);
+}
+#credits {
+    display: none;
 }
