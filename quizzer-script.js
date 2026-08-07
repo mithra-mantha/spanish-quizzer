@@ -1,7 +1,8 @@
 "use strict";
+// @ts-check
 /*
 Welcome to the brain of the spanish quizzer! Note that the "data" object is a global variable and so are correctFeedback, wrongFeedback and streakLossFeedback because they are in data.js which is loaded in the html before this script is. jQuery is loaded in here too.
-*/
+*/ 
 //Used to access the answers from the data object.
 let courseSelected = ""
 let chapterSelected = ""
@@ -22,9 +23,7 @@ let totalQuestions = 0;
 let insertLocations = [];
 // This is actually an outdated global variable that I should remove, and it is for keyboardShortcuts.
 let operatingSystem = "";
-if (navigator.platform.includes("MacIntel")) {
-    operatingSystem = "macOS"
-}
+const ANIMATION_LENGTH =  200
 const getQuestionArray = function () {
     const questions = $("#quiz-box").attr("data-question-array");
     if (questions.length === 0) {
@@ -477,6 +476,10 @@ const manualGrading = function (event) {
     $("#next-question").trigger("click");
 }
 const reset = function () {
+    let stateBeforeReset = "quiz"
+    if ($("#selection").css("display") != "none") {
+        stateBeforeReset = "selection"
+    }
     $("*").removeAttr("style");
     $("#quiz-title").text("Quiz Mode")
     $("#course-disable").prop("disabled", false);
@@ -511,10 +514,14 @@ const reset = function () {
     $("#course-selection").append("<option value='' disabled selected hidden>Please select an option</option>");
     $("#chapter-selection").append("<option value='' disabled selected hidden>Please select an option</option>");
     $("#topic-selection").append("<option value='' disabled selected hidden>Please select an option</option>");
-    $("#start").css("display", "block")
-    $("#selection").css("display", "none")
-    $("#streak").css("display", "none")
-    $("#keyboard-shortcuts").css("display", "none")
+    if (stateBeforeReset == "selection") {
+        // If the user is taking a quiz and presses 'reset' they don't want to see the selection page in between the animation.
+        $("#selection").fadeOut(ANIMATION_LENGTH)
+    } else {
+        $("#selection").css("display", "none")
+    }
+    $("#streak").fadeOut(ANIMATION_LENGTH, () => $("#start").fadeIn(ANIMATION_LENGTH))
+    $("#keyboard-shortcuts").fadeOut(ANIMATION_LENGTH)
     $("#start-button").one("click", askUserForCourse)
 }
 const resetButton = function () {
@@ -538,7 +545,6 @@ const checkAnswer = function (event={}) {
     }
     answers = data[courseSelected][chapterSelected][topicSelected][getCurrentQuestion()];
     let $result = $("#result");
-    $("#form").css("display", "none");
     let questionArray = getQuestionArray();
     let processedAnswers = []
     for (let i = 0; i < answers.length; i++) {
@@ -548,7 +554,6 @@ const checkAnswer = function (event={}) {
         //It's correct!
         $result.text(correctFeedback[Math.floor(Math.random() * correctFeedback.length)]);
         $result.css("color", "green")
-        $result.css("display", "block")
         $("#correct-sound")[0].play()
         //Okay, now time to modify the question array b/c the user got it right!
         if (questionRep[getCurrentQuestion()] === 1) {
@@ -632,8 +637,9 @@ const checkAnswer = function (event={}) {
             $("#correct-answer-sign").text("Correct Answers:")
             $("#correct-answer").text(answers.join(", "))
         }
-        $("#answer-explanation-table").css("display", "table")
-        $("#result").css("display", "block")
+        setTimeout(() => {
+            $("#answer-explanation-table").fadeIn(ANIMATION_LENGTH)
+        }, ANIMATION_LENGTH)
         //They got it wrong, so they should answer this question again two more times!
         questionArray.push(questionArray.shift()) //shift() returns the first element
         questionRep[getCurrentQuestion()] = questionRep[getCurrentQuestion()] + 2
@@ -651,9 +657,12 @@ const checkAnswer = function (event={}) {
         $("#manual-grading").on("click", {ogResult: false}, manualGrading)
     }
     changeQuestionArray(questionArray) //Permanently modifies the actual array.
-    $("#button-bar").css("display", "none")
-    $("#next-question").css("display", "inline-block")
-    $("#manual-grading").css("display", "inline-block")
+    $("#button-bar").fadeOut(ANIMATION_LENGTH)
+    $("#form").fadeOut(ANIMATION_LENGTH, () => {
+        $("#result").fadeIn(ANIMATION_LENGTH)
+        $("#next-question").fadeIn(ANIMATION_LENGTH)
+        $("#manual-grading").fadeIn(ANIMATION_LENGTH)
+    })
     storeInLocalStorage()
 }
 const setUpQuestion = function (event={}) {
@@ -666,12 +675,11 @@ const setUpQuestion = function (event={}) {
     $("#wrong-sound")[0].pause()
     $("#wrong-sound")[0].currentTime = 0
     oldStreak = streak
-    $("#button-bar").css("display", "revert")
-    $("#next-question").css("display", "none")
-    $("#manual-grading").css("display", "none")
+    $("#next-question").fadeOut(ANIMATION_LENGTH)
+    $("#manual-grading").fadeOut(ANIMATION_LENGTH)
     $("#manual-grading").off("click")
-    $("#answer-explanation-table").css("display", "none")
-    $("#result").css("display", "none")
+    $("#answer-explanation-table").fadeOut(ANIMATION_LENGTH)
+    $("#result").fadeOut(ANIMATION_LENGTH)
     //Poof!
     //Time to set up the next question.
     const questionArray = getQuestionArray()
@@ -702,11 +710,10 @@ const setUpQuestion = function (event={}) {
                 feedback = "You need more practice."
         }
         $("#question").text(`Your accuracy was ${percent}%. ${feedback}`)
-        $("#button-bar").css("display", "none")
-        $("#streak").css("display", "none")
-        $("#flaming-icon").css("display", "none")
-        $("#keyboard-shortcuts").css("display", "none")
-        $("#credits").css("display", "revert")
+        $("#button-bar").fadeOut(ANIMATION_LENGTH)
+        $("#streak").fadeOut(ANIMATION_LENGTH)
+        $("#flaming-icon").fadeOut(ANIMATION_LENGTH)
+        $("#keyboard-shortcuts").fadeOut(ANIMATION_LENGTH, () => $("#credits").fadeIn(ANIMATION_LENGTH))
         localStorage.clear()
         setTimeout(function () {
             $("#confetti").css("display", "inline")
@@ -728,7 +735,10 @@ const setUpQuestion = function (event={}) {
             }
         }
         $("#question").text(question);
-        $("#form").css("display", "block");
+        setTimeout(() => {
+            $("#form").fadeIn(ANIMATION_LENGTH)
+            $("#button-bar").fadeIn(ANIMATION_LENGTH)
+        }, ANIMATION_LENGTH)
         $("#answer-input").val("");//sets the input box to empty
         ($("#answer-input")[0]).focus();
         ($("#answer-input")[0]).setSelectionRange(0, 0);
@@ -743,19 +753,19 @@ const setUp = function (event) {
     $("#topic-disable").prop("disabled", true)
     const questionArray = shuffleArray(Object.keys(data[courseSelected][chapterSelected][topicSelected]))
     changeQuestionArray(questionArray)
-    $("#selection").css("display", "none")
-    $("#content").css("display", "revert")
-    $("#reset").css("display", "revert")
-    $("#keyboard-shortcuts").css("display", "revert")
-    $("#streak").css("display", "revert");
+    $("#selection").fadeOut(ANIMATION_LENGTH, () => {
+        $("#content").fadeIn(ANIMATION_LENGTH)
+        $("#keyboard-shortcuts").fadeIn(ANIMATION_LENGTH)
+        $("#streak").fadeIn(ANIMATION_LENGTH)
+        $("#button-bar").fadeIn(ANIMATION_LENGTH)
+        $("#form").fadeIn(ANIMATION_LENGTH)
+    })
     $('#form').on("submit", checkAnswer)
     $("#next-question").on("click", setUpQuestion)
     $("#shift").on("click", shiftAll);
-    $("#button-bar").css("display", "")
     const question = questionArray[0]
     changeCurrentQuestion(question)
     $("#question").text(question)
-    $("#form").css("display", "block")
     $("#answer-input").val("");
     ($("#answer-input")[0]).focus();
     ($("#answer-input")[0]).setSelectionRange(0, 0); //autoselect
@@ -785,7 +795,7 @@ const askUserForTopic = function (event) {
     event.preventDefault()
     chapterSelected = ($("#chapter-selection")).val()
     storeInLocalStorage()
-    $("#topic-selection-form").css("display", "revert")
+    $("#topic-selection-form").fadeIn(ANIMATION_LENGTH)
     $("#chapter-disable").prop("disabled", true)
     $("button.chapter-selection").css("visibility", "hidden")
     const topics = Object.keys(data[courseSelected][chapterSelected])
@@ -800,7 +810,7 @@ const askUserForChapter = function (event) {
     event.preventDefault()
     courseSelected = $("#course-selection").val()
     storeInLocalStorage()
-    $("#chapter-selection-form").css("display", "revert")
+    $("#chapter-selection-form").fadeIn(ANIMATION_LENGTH)
     $("#course-disable").prop("disabled", true)
     $("button.course-selection").css("visibility", "hidden")
     //The changes above made the course selection freeze. Poof!
@@ -813,10 +823,11 @@ const askUserForChapter = function (event) {
     $("#chapter-selection-form").one("submit", askUserForTopic)
 }
 const askUserForCourse = function () {
-    $("#selection").css("display", "")
     $("#content").css("display", "none");
-    $("#start").css("display", "none")
-    $("#reset").css("display", "revert")
+    $("#start").fadeOut(ANIMATION_LENGTH, () => {
+        $("#reset").fadeIn(ANIMATION_LENGTH)
+        $("#selection").fadeIn(ANIMATION_LENGTH)
+    })
     storeInLocalStorage()
     //Now fill the course selection with what courses are currently available.
     const courses = Object.keys(data)
