@@ -17,7 +17,8 @@ body {
 }
 #quiz-box {
     width: 90%;
-    height: 90%;
+    min-height: 90%;
+    height: auto;
     position: absolute;
     top: 50%;
     left: 50%;
@@ -101,6 +102,14 @@ body {
     color: black;
     font-weight: bold;
     z-index: 2;
+}
+@media screen and (max-width: 600px) {
+    /*In phone layouts, the problem is that the quiz-mode sign and the streak sign crash into each other.
+    Therefore, we can force the streak to go BELOW the quiz-mode sign to prevent that.*/
+    #flaming-icon, #streak {
+        transform: translateY(50px);
+    }
+
 }
 #button-bar {
     text-align: center;
