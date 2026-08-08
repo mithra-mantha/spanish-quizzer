@@ -196,6 +196,25 @@ summary:hover {
 #credits {
     display: none;
 }
-#daily-streak {
+/*
+By centering the streak and flaming-icon classes on a parent container, if we position a parent div relatively then the streak and flaming icon automatically align.
+*/
+.streak {
     font-weight: bold;
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    z-index: 10;
+    transform: translate(-50%, -50%);
+}
+.flaming-icon {
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    z-index: 0;
+    transform: translate(-50%, -65%);
+}
+#daily-streak-container {
+    position: relative;
+    left: 15px;
 }

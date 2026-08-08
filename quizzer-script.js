@@ -912,6 +912,11 @@ $(document).ready(function() {
         dailyStreak = 0
     }
     $("#daily-streak").text(String(dailyStreak));
+    if (dailyStreak < 5) {
+        $("#daily-streak-flaming-icon").css("display", "none")
+    } else {
+        $("#daily-streak").css("color", "red")
+    }
     if (state === "selection" || !state) {
         $("#start").css("display", "block")
         $("#start-button").one("click", askUserForCourse)
