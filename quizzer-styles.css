@@ -187,3 +187,6 @@ summary:hover {
 #credits {
     display: none;
 }
+#daily-streak {
+    font-weight: bold;
+}

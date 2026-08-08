@@ -3,6 +3,11 @@
 /*
 Welcome to the brain of the spanish quizzer! Note that the "data" object is a global variable and so are correctFeedback, wrongFeedback and streakLossFeedback because they are in data.js which is loaded in the html before this script is. jQuery is loaded in here too.
 */ 
+/*
+Notes for future:
+Add Daily streak using localStorage
+Add progress bars?
+*/
 //Used to access the answers from the data object.
 let courseSelected = ""
 let chapterSelected = ""
@@ -23,7 +28,8 @@ let totalQuestions = 0;
 let insertLocations = [];
 // This is actually an outdated global variable that I should remove, and it is for keyboardShortcuts.
 let operatingSystem = "";
-const ANIMATION_LENGTH =  200
+let dailyStreak = 0;
+const ANIMATION_LENGTH =  100
 const getQuestionArray = function () {
     const questions = $("#quiz-box").attr("data-question-array");
     if (questions.length === 0) {
@@ -130,6 +136,20 @@ const processAnswer = function (answer, removePunctuation=true, removeSpaces=tru
     answer = answer.replaceAll("(", "")
     answer = answer.replaceAll("|", "")
     answer = answer.replaceAll("$", "")
+    answer = answer.replaceAll("*", "")
+    answer = answer.replaceAll("@", "")
+    answer = answer.replaceAll("#", "")
+    answer = answer.replaceAll("%", "")
+    answer = answer.replaceAll("^", "")
+    answer = answer.replaceAll("&", "")
+    answer = answer.replaceAll("_", "")
+    answer = answer.replaceAll("~", "")
+    answer = answer.replaceAll("`", "")
+    answer = answer.replaceAll("+", "")
+    answer = answer.replaceAll("=", "")
+    answer = answer.replaceAll("<", "")
+    answer = answer.replaceAll(">", "")
+    answer = answer.replaceAll("-", "")
     if (removePunctuation) {
         answer = answer.replaceAll("?", "")
         answer = answer.replaceAll("!", "")
@@ -304,19 +324,12 @@ const keyboardShortcut = function (event) {
         }
     }
 }
-const storeInLocalStorage = function () {
-    if ($("#content").css("display") === "none") {
-        localStorage.setItem("spanish-quizzer-state", "selection")
-    } else if ($("#form").css("display") === "none") {
-        localStorage.setItem("spanish-quizzer-state", "answer")
-    } else {
-        localStorage.setItem("spanish-quizzer-state", "question")
-    }
+const storeInLocalStorage = function (state) {
     /* Why does everything start with "spanish-quizzer-"?
     localStorage is stored in the origin, the first part of the url encompassing the mydomain.extension.
     Which means if I host something else on the same thing, I might override THEIR localStorage or vice versa.
     */
-
+    localStorage.setItem("spanish-quizzer-state", state)
     localStorage.setItem("spanish-quizzer-courseSelected", courseSelected)
     localStorage.setItem("spanish-quizzer-chapterSelected", chapterSelected)
     localStorage.setItem("spanish-quizzer-topicSelected", topicSelected)
@@ -331,6 +344,12 @@ const storeInLocalStorage = function () {
     localStorage.setItem("spanish-quizzer-questionsCorrect", String(questionsCorrect))
     localStorage.setItem("spanish-quizzer-insertLocations", JSON.stringify(insertLocations))
     localStorage.setItem("spanish-quizzer-$resultText", $("#result").text())
+    localStorage.setItem("spanish-quizzer-daily-streak", String(dailyStreak))
+    //Store the date
+    const now = new Date()
+    localStorage.setItem("spanish-quizzer-year-last-visited", String(now.getFullYear()))
+    localStorage.setItem("spanish-quizzer-month-last-visited", String(now.getMonth()))
+    localStorage.setItem("spanish-quizzer-day-last-visited", String(now.getDate()));
     //This stores EVERYTHING in localstorage, useful or not.
 }
 const getLocalStorage = function () {
@@ -351,12 +370,19 @@ const getLocalStorage = function () {
             "questionsCorrect":Number(localStorage.getItem("spanish-quizzer-questionsCorrect")),
             "insertLocations":JSON.parse(localStorage.getItem("spanish-quizzer-insertLocations")),
             "$resultText":localStorage.getItem("spanish-quizzer-$resultText"),
+            "dailyStreak": parseInt(localStorage.getItem("spanish-quizzer-daily-streak")),
+            "year": parseInt(localStorage.getItem("spanish-quizzer-year-last-visited")),
+            "month": parseInt(localStorage.getItem("spanish-quizzer-month-last-visited")),
+            "day": parseInt(localStorage.getItem("spanish-quizzer-day-last-visited")),
         }
+        return storage
         if (Object.values(storage).includes(null)) {
+            console.error(storage)
             return {state:"selection"}
         }
         return storage;
-    } catch {
+    } catch (error) {
+        console.error(error, storage)
         return {
             state:"selection"
         }
@@ -662,8 +688,8 @@ const checkAnswer = function (event={}) {
         $("#result").fadeIn(ANIMATION_LENGTH)
         $("#next-question").fadeIn(ANIMATION_LENGTH)
         $("#manual-grading").fadeIn(ANIMATION_LENGTH)
-    })
-    storeInLocalStorage()
+    });
+    storeInLocalStorage("answer")
 }
 const setUpQuestion = function (event={}) {
     //Make the answer explanation and button disappear
@@ -744,7 +770,7 @@ const setUpQuestion = function (event={}) {
         ($("#answer-input")[0]).setSelectionRange(0, 0);
         //Autoselects the input box
     }
-    storeInLocalStorage()
+    storeInLocalStorage("question")
 }
 const setUp = function (event) {
     event.preventDefault();
@@ -789,12 +815,12 @@ const setUp = function (event) {
         })
     //Add some keyboard shortcuts
     $(document).on("keydown", keyboardShortcut)
-    storeInLocalStorage();
+    storeInLocalStorage("question");
 }
 const askUserForTopic = function (event) {
     event.preventDefault()
     chapterSelected = ($("#chapter-selection")).val()
-    storeInLocalStorage()
+    storeInLocalStorage("selection")
     $("#topic-selection-form").fadeIn(ANIMATION_LENGTH)
     $("#chapter-disable").prop("disabled", true)
     $("button.chapter-selection").css("visibility", "hidden")
@@ -809,7 +835,7 @@ const askUserForTopic = function (event) {
 const askUserForChapter = function (event) {
     event.preventDefault()
     courseSelected = $("#course-selection").val()
-    storeInLocalStorage()
+    storeInLocalStorage("selection")
     $("#chapter-selection-form").fadeIn(ANIMATION_LENGTH)
     $("#course-disable").prop("disabled", true)
     $("button.course-selection").css("visibility", "hidden")
@@ -828,7 +854,7 @@ const askUserForCourse = function () {
         $("#reset").fadeIn(ANIMATION_LENGTH)
         $("#selection").fadeIn(ANIMATION_LENGTH)
     })
-    storeInLocalStorage()
+    storeInLocalStorage("selection")
     //Now fill the course selection with what courses are currently available.
     const courses = Object.keys(data)
     for (let i = 0; i < courses.length; i++) {
@@ -852,6 +878,7 @@ $(document).ready(function() {
     }) //Sets the volume of the audio to 0.2, which is just above "just right".
     if (getSystemInfo().device !== "Desktop") {
         $("#keyboard-shortcuts")[0].remove()
+        $("#logo")[0].remove()
         // Gives the browser some time to remove the keyboard shortcuts so that they don't even exist in memory.
         setTimeout(function () {
         alert("You are on a non-recommended device. It is strongly recommended to use a laptop instead.")}, 50)
@@ -871,6 +898,20 @@ $(document).ready(function() {
     })
     const localStorageData = getLocalStorage()
     const state = localStorageData.state
+    const lastVisited = new Date(localStorageData.year, localStorageData.month, localStorageData.day);
+    const today = new Date()
+    const differenceInDays = Math.floor((today - lastVisited) / (1000 * 60 * 60 * 24));
+    if (differenceInDays > 1) {
+        dailyStreak = 0
+    } else if (differenceInDays == 1){
+        dailyStreak = localStorageData.dailyStreak + 1;
+    } else {
+        dailyStreak = localStorageData.dailyStreak
+    }
+    if (isNaN(dailyStreak) || dailyStreak == undefined) {
+        dailyStreak = 0
+    }
+    $("#daily-streak").text(String(dailyStreak));
     if (state === "selection" || !state) {
         $("#start").css("display", "block")
         $("#start-button").one("click", askUserForCourse)
