@@ -184,7 +184,7 @@ summary:hover {
 #start {
     display: none;
 }
-#start-button {
+#start button {
     font-size: 2em;
 }
 #contacts {
@@ -217,4 +217,37 @@ By centering the streak and flaming-icon classes on a parent container, if we po
 #daily-streak-container {
     position: relative;
     left: 15px;
+}
+dialog {
+    background-color: var(--quizbox-color);
+}
+dialog:hover {
+    cursor: pointer;
+}
+#dialog-box {
+    cursor: default;
+}
+textarea {
+    font-family: Verdana, Roboto, Arial, Calibri, Georgia, sans-serif;
+}
+dialog div div {
+    text-align: left; 
+    font-style: italic; 
+    font-family: Arial, Helvetica, sans-serif;
+    margin-left: 30%;
+}
+#custom-quiz-input-submit {
+    font-size: 2em;
+}
+#custom-quiz-invalid-warning {
+    color: red;
+    font-weight: bold;
+}
+dialog::backdrop {
+    backdrop-filter: brightness(50%);
+}
+#close-dialog {
+    position: absolute;
+    right: 10px;
+    top: 10px;
 }

@@ -7,7 +7,7 @@
     <base target="_blank">
     <link rel="icon" href="assets/logo.png" type="image/png">
     <link rel="stylesheet" href="quizzer-styles.css">
-    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js" defer></script>
+    <script src="https://cdn.jsdelivr.net/npm/jquery@4.0.0/dist/jquery.min.js" defer></script>
     <script src="data.js" defer></script>
     <script src="quizzer-script.js" defer></script>
 </head>
@@ -114,7 +114,10 @@
         </div>
         <div id="start">
             <h1>Ready to begin?</h1>
-            <button id="start-button">Select your quiz topic</button>
+            <button id="start-button">Select a quiz topic</button>
+            <br>
+            <br>
+            <button id="custom-quiz-button" commandfor="user-question-dialog" command="show-modal">Create a custom quiz</button>
             <p>Your daily streak:
                 <span id="daily-streak-container"">
                 <span id="daily-streak" class="streak">0</span><img id="daily-streak-flaming-icon" class="flaming-icon" src="assets/flaming-streak-icon.png" title="Look at your amazing streak!" alt="Flaming streak icon" width="70px">
@@ -127,6 +130,36 @@
             </div>
         </div>
     </div>
+    <dialog id="user-question-dialog" onclick="if (event.target === this) {this.close()}">
+        <div id="dialog-box">
+            <button onclick="document.getElementById('user-question-dialog').close()" aria-label="Close the popup dialog" id="close-dialog">✖</button>
+        <h1>Custom quiz</h1>
+        <div>
+            Enter your custom quiz below in the following format:
+            <div> <br>
+                ## Question <br>
+                == Answer1 <br>
+                == Answer2 <br>
+                == More correct answers <br>
+                ## Question 2 <br>
+                == The answer to question2 <br>
+            </div>
+            You can put as many questions and answers as you want. Just make sure to begin every question with a ##, and every answer with a ==.
+            <br>
+            <p id="custom-quiz-invalid-warning"></p>
+        </div>
+        <form>
+            <label for="custom-quiz-input"></label>
+            <textarea id="custom-quiz-input" rows="20" cols="80" placeholder="Type your custom quiz here...">
+        </div>
+## Question
+== Answer1
+== Answer2
+            </textarea>
+            <br>
+            <button id="custom-quiz-input-submit">Submit</button>
+        </form>
+    </dialog>
     <p id="version">V97</p>
     <script data-goatcounter="https://mithra-mantha.goatcounter.com/count"
         async src="https://gc.zgo.at/count.js"></script> <!--This is to count how many viewers go on the site...it does NOT track them across the web, it just tells me how many people and from what countries and browsers.-->

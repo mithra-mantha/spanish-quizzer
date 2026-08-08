@@ -426,6 +426,65 @@ const shiftAll = function () {
         })
     }
 }
+const processUserQuiz = function (string) {
+    if (string.trim().length === 0) {
+        return "You didn't enter anything."
+    }
+    const lines = string.split("\n")
+    let currentQuestion = ""
+    let currentAnswers = []
+    let quizObject = {}
+    let isFirstQuestion = true
+    for (let line of lines) {
+        line = line.trim()
+        if (line.length === 0) {
+            // The line is empty, so continue.
+            continue;
+        }
+        if (line.startsWith("##")) {
+            if (currentAnswers.length === 0 && currentQuestion.length > 0) {
+                return "One question has no answers for it."
+            } else {
+                if (currentQuestion.length > 0 || (isFirstQuestion && line.trim() != "##")) {
+                    if (!isFirstQuestion) {
+                        quizObject[currentQuestion] = currentAnswers
+                    }
+                    isFirstQuestion = false
+                    currentQuestion = line.slice(2, line.length).trim()
+                    currentAnswers = []
+                } else if (currentQuestion.length === 0) {
+                    return "One of your questions is empty."
+                }
+            }
+        } else if (line.startsWith("==")) {
+            const answer = line.slice(2, line.length).trim()
+            if (answer.length > 0) {
+                currentAnswers.push(answer)
+            } else {
+                return "One of your answers is empty."
+            }
+        } else {
+            return "Your input is invalid."
+        }
+    }
+    if (currentQuestion.length > 0 && currentAnswers.length > 0) {
+        quizObject[currentQuestion] = currentAnswers
+    } else {
+        return ((currentQuestion.length === 0 && currentAnswers.length === 0) 
+        ? "You left a ## at the end." : currentQuestion.length === 0
+        ? "The last question is empty." : "There are no answers given for the last question.")
+    }
+    return quizObject
+}
+const customQuizDialogClose = function (event) {
+    event.preventDefault()
+    const processedQuiz = processUserQuiz($("#custom-quiz-input").val())
+    if (typeof processedQuiz === "string") {
+        $("#custom-quiz-invalid-warning").text("Error: " + processedQuiz)
+    } else if (typeof processedQuiz === "object") {
+        $("#user-question-dialog")[0].close()
+    }
+}
 const findQuestionSpots = function (question, array) {
     // This returns either an array of indexes to insert, or undefined.
     // It returns an array of 2
@@ -867,6 +926,7 @@ const askUserForCourse = function () {
 }
 $(document).ready(function() {
     $("#reset").on("click", resetButton)
+    $("#custom-quiz-input-submit").on("click", customQuizDialogClose)
     //Set up the keyboard shortcuts sign.
     const windowWidth = window.innerWidth
     const windowHeight = window.innerHeight

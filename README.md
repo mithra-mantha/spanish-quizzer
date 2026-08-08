@@ -39,11 +39,11 @@ This is a static site, which means that all the code is run client-side. While t
 The current question and the array of questions are defined as data-* attributes in the quizbox div, and they are accessed and modified using getCurrentQuestion(), changeCurrentQuestion(), getQuestionArray(), & changeQuestionArray().
 
 ### Topic selection:
-
-1. askUserForCourse() asks you for your course(1a, 1b, etc.) by iterating through the data object and looking at all the courses. An event listener is added for when you click submit using jQuery .one().
-2. After you click it, the old event listener is deleted automatically by jQuery, the fieldset that surrounds all the options that were injected dynamically is disabled and so is the button so you can't change your answer(and mess up the code), and askUserForChapter() now asks you for your chapter. An event listener is there for that.
-3. Same thing happens for askUserForTopic()
-4. Once that happens, it figures out the questionArray and the content loads.
+1. An event listener is attached to the START button for askUserForCourse().
+2. askUserForCourse() asks you for your course(1a, 1b, etc.) by iterating through the data object and looking at all the courses. An event listener is added for when you click submit using jQuery .one().
+3. After you click it, the old event listener is deleted automatically by jQuery, the fieldset that surrounds all the options that were injected dynamically is disabled and so is the button so you can't change your answer(and mess up the code), and askUserForChapter() now asks you for your chapter. An event listener is there for that.
+4. Same thing happens for askUserForTopic()
+5. Once that happens, it figures out the questionArray and the content loads.
 
 ### Manual grading:
 
