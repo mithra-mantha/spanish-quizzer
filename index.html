@@ -119,7 +119,7 @@
             <br>
             <button id="custom-quiz-button" commandfor="user-question-dialog" command="show-modal">Create a custom quiz</button>
             <p>Your daily streak:
-                <span id="daily-streak-container"">
+                <span id="daily-streak-container">
                 <span id="daily-streak" class="streak">0</span><img id="daily-streak-flaming-icon" class="flaming-icon" src="assets/flaming-streak-icon.png" title="Look at your amazing streak!" alt="Flaming streak icon" width="70px">
                 </span>
             </p>
@@ -144,14 +144,15 @@
                 ## Question 2 <br>
                 == The answer to question2 <br>
             </div>
-            You can put as many questions and answers as you want. Just make sure to begin every question with a ##, and every answer with a ==.
+            You can put as many questions and answers as you want. Just make sure to begin every question with a '##', and every answer with a '=='.
             <br>
             <p id="custom-quiz-invalid-warning"></p>
         </div>
         <form>
-            <label for="custom-quiz-input"></label>
+            <label for="custom-quiz-title-input">Enter the title below:</label><br>
+            <input type="text" id="custom-quiz-title-input"><br>
+            <label for="custom-quiz-input">Enter your quiz here:</label><br>
             <textarea id="custom-quiz-input" rows="20" cols="80" placeholder="Type your custom quiz here...">
-        </div>
 ## Question
 == Answer1
 == Answer2
@@ -159,6 +160,7 @@
             <br>
             <button id="custom-quiz-input-submit">Submit</button>
         </form>
+        </div>
     </dialog>
     <p id="version">V97</p>
     <script data-goatcounter="https://mithra-mantha.goatcounter.com/count"

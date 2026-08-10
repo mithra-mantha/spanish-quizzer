@@ -28,6 +28,9 @@ let totalQuestions = 0;
 let insertLocations = [];
 // This is actually an outdated global variable that I should remove, and it is for keyboardShortcuts.
 let operatingSystem = "";
+if (navigator.platform.includes("MacIntel")) {
+    operatingSystem = "macOS"
+}
 let dailyStreak = 0;
 const ANIMATION_LENGTH =  100
 const getQuestionArray = function () {
@@ -345,6 +348,7 @@ const storeInLocalStorage = function (state) {
     localStorage.setItem("spanish-quizzer-insertLocations", JSON.stringify(insertLocations))
     localStorage.setItem("spanish-quizzer-$resultText", $("#result").text())
     localStorage.setItem("spanish-quizzer-daily-streak", String(dailyStreak))
+    localStorage.setItem("spanish-quizzer-user-created-quizzes", JSON.stringify(data["Custom Quizzes"] ? data["Custom Quizzes"] : {}))
     //Store the date
     const now = new Date()
     localStorage.setItem("spanish-quizzer-year-last-visited", String(now.getFullYear()))
@@ -370,19 +374,27 @@ const getLocalStorage = function () {
             "questionsCorrect":Number(localStorage.getItem("spanish-quizzer-questionsCorrect")),
             "insertLocations":JSON.parse(localStorage.getItem("spanish-quizzer-insertLocations")),
             "$resultText":localStorage.getItem("spanish-quizzer-$resultText"),
+            "userCreatedQuizzes": JSON.parse(localStorage.getItem("spanish-quizzer-user-created-quizzes")),
             "dailyStreak": parseInt(localStorage.getItem("spanish-quizzer-daily-streak")),
             "year": parseInt(localStorage.getItem("spanish-quizzer-year-last-visited")),
             "month": parseInt(localStorage.getItem("spanish-quizzer-month-last-visited")),
             "day": parseInt(localStorage.getItem("spanish-quizzer-day-last-visited")),
         }
-        return storage
         if (Object.values(storage).includes(null)) {
-            console.error(storage)
-            return {state:"selection"}
+            const nonEmptyValues = {state:"selection", "userCreatedQuizzes": JSON.parse(localStorage.getItem("spanish-quizzer-user-created-quizzes")),
+            "dailyStreak": parseInt(localStorage.getItem("spanish-quizzer-daily-streak")),
+            "year": parseInt(localStorage.getItem("spanish-quizzer-year-last-visited")),
+            "month": parseInt(localStorage.getItem("spanish-quizzer-month-last-visited")),
+            "day": parseInt(localStorage.getItem("spanish-quizzer-day-last-visited")),}
+            if (Object.values(nonEmptyValues).includes(null)) {
+                console.error("localStorage data has been corrupted", nonEmptyValues)
+                return {"state": "selection"}
+            }
+            return nonEmptyValues
         }
         return storage;
     } catch (error) {
-        console.error(error, storage)
+        console.error("Failed to fetch localStorage data", error)
         return {
             state:"selection"
         }
@@ -481,7 +493,25 @@ const customQuizDialogClose = function (event) {
     const processedQuiz = processUserQuiz($("#custom-quiz-input").val())
     if (typeof processedQuiz === "string") {
         $("#custom-quiz-invalid-warning").text("Error: " + processedQuiz)
+        return;
     } else if (typeof processedQuiz === "object") {
+        const title = $("#custom-quiz-title-input").val()
+        if (!title) {
+            $("#custom-quiz-invalid-warning").text("Please enter a title for your custom quiz.")
+            return;
+        }
+        if (data["Custom Quizzes"]) {
+            if (data["Custom Quizzes"]["Quizzes"]) {
+                // If the user has already created a couple of question sets, add this to that.
+                data["Custom Quizzes"]["Quizzes"][title] = processedQuiz
+            }
+        } else {
+            // Create a new Custom Quizzes object in data if there isn't one.
+            data["Custom Quizzes"] = {}
+            data["Custom Quizzes"]["Quizzes"] = {}
+            data["Custom Quizzes"]["Quizzes"][title] = processedQuiz
+        }
+        storeInLocalStorage("selection")
         $("#user-question-dialog")[0].close()
     }
 }
@@ -492,15 +522,15 @@ const findQuestionSpots = function (question, array) {
         if (array.length >= 6) {
             return [2, 5];
         } else {
-            return;
+            return [];
         };
     };
     if (array.length <= 3) {
-        return;
+        return [];
     };
     const bufferLength = 2;
     const startingBuffer = 2;
-    let candidates = []
+    let candidates = [];
     for (let i = startingBuffer; i < array.length; i++) {
         //Note to self keep it this way so that it always returns ordered list.
         const checkArea = array.slice(Math.max(i - bufferLength, 0), Math.min(i + bufferLength + 1, array.length)); // + 1 is required because the second value is exclusive.
@@ -514,7 +544,7 @@ const findQuestionSpots = function (question, array) {
         candidates.push(i)
     };
     if (candidates.length === 0) {
-        return;
+        return [];
     } else if (candidates.length <= 2) {
         return candidates
     }
@@ -593,6 +623,7 @@ const reset = function () {
     $(document).off("click");
     $("*").off(); ///Just in case destroys any remaining event listeners.
     $("#reset").on("click", resetButton); //Don't destroy the event listener for resetButton!!!
+    $("#custom-quiz-input-submit").on("click", customQuizDialogClose) // Or the one for the dialog...
     //Clear localStorage.
     clearLocalStorage();
     // Make sure to add the default required element though.
@@ -652,7 +683,7 @@ const checkAnswer = function (event={}) {
         questionsCorrect++
         totalQuestions++
         refreshStreak(streak)
-        if (getQuestionArray().length === 1 && questionRep[getCurrentQuestion()] <= 1) {
+        if (questionArray.length <= 1 && questionRep[getCurrentQuestion()] <= 0) {
             $("#next-question").text("Finish")
         } else {
             $("#next-question").text("Next Question")
@@ -799,7 +830,7 @@ const setUpQuestion = function (event={}) {
         $("#streak").fadeOut(ANIMATION_LENGTH)
         $("#flaming-icon").fadeOut(ANIMATION_LENGTH)
         $("#keyboard-shortcuts").fadeOut(ANIMATION_LENGTH, () => $("#credits").fadeIn(ANIMATION_LENGTH))
-        localStorage.clear()
+        clearLocalStorage();
         setTimeout(function () {
             $("#confetti").css("display", "inline")
         }, 3000)
@@ -957,6 +988,12 @@ $(document).ready(function() {
         event.preventDefault()
     })
     const localStorageData = getLocalStorage()
+    if (localStorageData.userCreatedQuizzes != undefined) {
+        if (Object.keys(localStorageData.userCreatedQuizzes).length > 0) {
+            data["Custom Quizzes"] = localStorageData.userCreatedQuizzes
+        }
+    }
+
     const state = localStorageData.state
     const lastVisited = new Date(localStorageData.year, localStorageData.month, localStorageData.day);
     const today = new Date()
@@ -1047,7 +1084,7 @@ $(document).ready(function() {
                 $result.css("display", "block")
                 $("#manual-grading").text("I got this wrong");
                 $("#manual-grading").css("background-color", "var(--manual-grading-wrong-color)");
-                if (getQuestionArray().length <= 1 && questionRep[getCurrentQuestion()] <= 1) {
+                if (getQuestionArray().length <= 1 && questionRep[getCurrentQuestion()] <= 0) {
                     $("#next-question").text("Finish")
                 } else {
                     $("#next-question").text("Next Question")

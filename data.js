@@ -341,7 +341,7 @@ const Chapter3 = {
     'What is "to believe in"?': ['creer (en)'],
     'What is "should / must"?': ['deber'],
     'What is "to write"?': ['escribir'],
-    'What is "to leer"?': ['leer'],
+    'What is "to read"?': ['leer'],
     'What is "to receive"?': ['recibir'],
     'What is "to live"?': ['vivir']
   },
@@ -468,7 +468,6 @@ const incorrectFeedback = [
     "No pressure.",
 ];
 // JavaScript Array for Streak Losses
-//Currently just using one
 const streakLossFeedback = [
     "You've lost your streak.",
     "Streak lost!",

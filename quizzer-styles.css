@@ -109,6 +109,13 @@ body {
     #flaming-icon, #streak {
         transform: translateY(50px);
     }
+    input {
+        width: 90%;
+        -webkit-appearance: none;
+        appearance: none;
+        padding: 10px;
+        margin: auto;
+    }
 
 }
 #button-bar {
