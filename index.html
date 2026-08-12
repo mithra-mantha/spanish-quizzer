@@ -8,12 +8,13 @@
     <link rel="icon" href="assets/logo.png" type="image/png">
     <link rel="stylesheet" href="quizzer-styles.css">
     <script src="https://cdn.jsdelivr.net/npm/jquery@4.0.0/dist/jquery.min.js" defer></script>
+    <script src="https://cdn.jsdelivr.net/npm/lz-string@1.5.0/libs/lz-string.min.js" defer></script>
     <script src="data.js" defer></script>
     <script src="quizzer-script.js" defer></script>
 </head>
 <body>
     <img id="logo" src="assets/logo.png" width="50px" alt="Spanish quizzer logo">
-    <button id="reset" type="button" title="Click this to reset your progress">Reset ⟳</button>
+    <button id="reset" type="button" title="Click this to reset your progress" class="no-listener-clear">Reset ⟳</button>
     <img id="flaming-icon" src="assets/flaming-streak-icon.png" title="Look at your amazing streak!" alt="Flaming streak icon" width="70px">
     <p id="streak" aria-live="polite">Streak: <span id="streak-num">0</span></p>
     <audio id="correct-sound" src="assets/correct-sound.mp3" preload="auto"></audio>
@@ -117,7 +118,7 @@
             <button id="start-button">Select a quiz topic</button>
             <br>
             <br>
-            <button id="custom-quiz-button" commandfor="user-question-dialog" command="show-modal">Create a custom quiz</button>
+            <button id="custom-quiz-button" class="no-listener-clear">Create a custom quiz</button>
             <p>Your daily streak:
                 <span id="daily-streak-container">
                 <span id="daily-streak" class="streak">0</span><img id="daily-streak-flaming-icon" class="flaming-icon" src="assets/flaming-streak-icon.png" title="Look at your amazing streak!" alt="Flaming streak icon" width="70px">
@@ -152,13 +153,18 @@
             <label for="custom-quiz-title-input">Enter the title below:</label><br>
             <input type="text" id="custom-quiz-title-input"><br>
             <label for="custom-quiz-input">Enter your quiz here:</label><br>
-            <textarea id="custom-quiz-input" rows="20" cols="80" placeholder="Type your custom quiz here...">
-## Question
-== Answer1
-== Answer2
-            </textarea>
+            <textarea id="custom-quiz-input" rows="20" cols="80" placeholder="Example:
+## What is 1 + 1?
+== 2
+== Two
+
+## What is 2 + 2?
+== 4
+== Four
+            "></textarea>
             <br>
-            <button id="custom-quiz-input-submit">Submit</button>
+            <button id="custom-quiz-input-submit" class="no-listener-clear" type="button">Save</button> <br>
+            <button id="custom-quiz-copy-link" disabled title="Please first save your quiz." type="button">Copy  link</button>
         </form>
         </div>
     </dialog>

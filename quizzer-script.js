@@ -1,12 +1,12 @@
 "use strict";
 // @ts-check
+// global LZString
 /*
 Welcome to the brain of the spanish quizzer! Note that the "data" object is a global variable and so are correctFeedback, wrongFeedback and streakLossFeedback because they are in data.js which is loaded in the html before this script is. jQuery is loaded in here too.
 */ 
 /*
 Notes for future:
-Add Daily streak using localStorage
-Add progress bars?
+If the user has an existing quiz make sure to remind them that they are overriding it with a new quiz.
 */
 //Used to access the answers from the data object.
 let courseSelected = ""
@@ -119,6 +119,15 @@ const getSystemInfo = function () {
         browser = "Safari"
     }
     info["browser"] = browser
+    let renderingEngine = "Unknown"
+    if (window.chrome && typeof window.chrome === "object") {
+        renderingEngine = "Blink"
+    } else if ("webkitConvertPointFromNodeInPage" in window || "webkitRequestAnimationFrame" in window) {
+        renderingEngine = "WebKit"
+    } else if (window.netscape || "mozGetUserMedia" in navigator) {
+        renderingEngine = "Gecko"
+    }
+    info["renderingEngine"] = renderingEngine
     return info;
 }
 const processAnswer = function (answer, removePunctuation=true, removeSpaces=true) {
@@ -488,11 +497,12 @@ const processUserQuiz = function (string) {
     }
     return quizObject
 }
-const customQuizDialogClose = function (event) {
+const customQuizDialogSubmit = function (event) {
     event.preventDefault()
     const processedQuiz = processUserQuiz($("#custom-quiz-input").val())
     if (typeof processedQuiz === "string") {
         $("#custom-quiz-invalid-warning").text("Error: " + processedQuiz)
+        $("#custom-quiz-copy-link").prop("disabled", true).attr("title", "Please fix the issue and save the quiz first.").off()
         return;
     } else if (typeof processedQuiz === "object") {
         const title = $("#custom-quiz-title-input").val()
@@ -500,6 +510,7 @@ const customQuizDialogClose = function (event) {
             $("#custom-quiz-invalid-warning").text("Please enter a title for your custom quiz.")
             return;
         }
+        $("#custom-quiz-invalid-warning").text("")
         if (data["Custom Quizzes"]) {
             if (data["Custom Quizzes"]["Quizzes"]) {
                 // If the user has already created a couple of question sets, add this to that.
@@ -510,9 +521,42 @@ const customQuizDialogClose = function (event) {
             data["Custom Quizzes"] = {}
             data["Custom Quizzes"]["Quizzes"] = {}
             data["Custom Quizzes"]["Quizzes"][title] = processedQuiz
+            navigator.storage.persisted().then((wasAccepted) => {
+                if (!wasAccepted) {
+                    navigator.storage.persist().then(isAccepted => {
+                        if (!isAccepted) {
+                            if (getSystemInfo().renderingEngine === "WebKit") {
+                                alert("Permanent save failed.\n\nThis means that your custom quizzes may be deleted occasionally. It is highly recommended to copy the link and save it so that your custom quiz isn't lost forever.")
+                            }
+                        }
+                    })
+                }
+            });
         }
-        storeInLocalStorage("selection")
-        $("#user-question-dialog")[0].close()
+        const encodedQuiz = LZString.compressToEncodedURIComponent(JSON.stringify({[title]:processedQuiz}))
+        let baseUrl = window.location.origin + window.location.pathname
+        if (baseUrl.endsWith("/")) {
+            baseUrl = baseUrl.slice(0, -1)
+        }
+        const fullUrl = `${baseUrl}#${encodedQuiz}`
+        if (fullUrl.length < 2048) {
+            $("#custom-quiz-copy-link").removeAttr("disabled").removeAttr("title").off("click").on("click", (event) => {
+                event.preventDefault()
+                navigator.clipboard.writeText(fullUrl)
+                .then(() => {
+                    $("#custom-quiz-copy-link").text("Copied successfully!")
+                    setTimeout(() => $("#custom-quiz-copy-link").text("Copy link"), 5000)
+                })
+                .catch(() => {
+                    alert("Copying failed. Please copy this URL manually: " + fullUrl)
+                });
+            })
+        } else {
+            $("#custom-quiz-invalid-warning").text("Your quiz is too long to turn into a link.")
+            $("#custom-quiz-copy-link").off().prop("disabled", true).attr("title", "Your quiz is too long to turn into a link. To generate a link, please shorten it.")
+
+        }
+        storeInLocalStorage("selection");
     }
 }
 const findQuestionSpots = function (question, array) {
@@ -615,15 +659,7 @@ const reset = function () {
     questionRep = {};
     questionsCorrect = 0;
     totalQuestions = 0;
-    //Remove all event listeners.
-    $("button").each(function (index, element) {
-        $(element).off();
-    });
-    $(document).off("keydown");
-    $(document).off("click");
-    $("*").off(); ///Just in case destroys any remaining event listeners.
-    $("#reset").on("click", resetButton); //Don't destroy the event listener for resetButton!!!
-    $("#custom-quiz-input-submit").on("click", customQuizDialogClose) // Or the one for the dialog...
+    $("*:not(.no-listener-clear)").off(); // KILL THE EVENT LISTENERS!
     //Clear localStorage.
     clearLocalStorage();
     // Make sure to add the default required element though.
@@ -635,6 +671,11 @@ const reset = function () {
         $("#selection").fadeOut(ANIMATION_LENGTH)
     } else {
         $("#selection").css("display", "none")
+    }
+    if (dailyStreak < 5) {
+        $("#daily-streak-flaming-icon").css("display", "none")
+    } else {
+        $("#daily-streak").css("color", "red")
     }
     $("#streak").fadeOut(ANIMATION_LENGTH, () => $("#start").fadeIn(ANIMATION_LENGTH))
     $("#keyboard-shortcuts").fadeOut(ANIMATION_LENGTH)
@@ -683,7 +724,7 @@ const checkAnswer = function (event={}) {
         questionsCorrect++
         totalQuestions++
         refreshStreak(streak)
-        if (questionArray.length <= 1 && questionRep[getCurrentQuestion()] <= 0) {
+        if (questionArray.length === 0 && questionRep[getCurrentQuestion()] <= 0) {
             $("#next-question").text("Finish")
         } else {
             $("#next-question").text("Next Question")
@@ -862,9 +903,11 @@ const setUpQuestion = function (event={}) {
     }
     storeInLocalStorage("question")
 }
-const setUp = function (event) {
-    event.preventDefault();
-    topicSelected = $("#topic-selection").val()
+const setUp = function (event={}) {
+    if (Object.keys(event).length > 0) {
+        event.preventDefault();
+        topicSelected = $("#topic-selection").val()
+    }
     refreshStreak(0);
     $("#topic-disable").prop("disabled", true)
     const questionArray = shuffleArray(Object.keys(data[courseSelected][chapterSelected][topicSelected]))
@@ -957,7 +1000,12 @@ const askUserForCourse = function () {
 }
 $(document).ready(function() {
     $("#reset").on("click", resetButton)
-    $("#custom-quiz-input-submit").on("click", customQuizDialogClose)
+    $("#custom-quiz-button").on("click", event => {
+        event.preventDefault()
+        $("#custom-quiz-copy-link").prop("disabled", true).text("Copy link").attr("title", "Please first save your quiz.").off()
+        $("#user-question-dialog")[0].showModal()
+    })
+    $("#custom-quiz-input-submit").on("click", customQuizDialogSubmit);
     //Set up the keyboard shortcuts sign.
     const windowWidth = window.innerWidth
     const windowHeight = window.innerHeight
@@ -993,7 +1041,6 @@ $(document).ready(function() {
             data["Custom Quizzes"] = localStorageData.userCreatedQuizzes
         }
     }
-
     const state = localStorageData.state
     const lastVisited = new Date(localStorageData.year, localStorageData.month, localStorageData.day);
     const today = new Date()
@@ -1013,6 +1060,41 @@ $(document).ready(function() {
         $("#daily-streak-flaming-icon").css("display", "none")
     } else {
         $("#daily-streak").css("color", "red")
+    }
+    if (window.location.hash) {
+        const rawHash = window.location.hash
+        let processedHash;
+        try {
+            processedHash = JSON.parse(LZString.decompressFromEncodedURIComponent(rawHash.substring(1))) // .substring() removes the leading #.
+            if (processedHash == null || typeof processedHash !== "object" || Object.keys(processedHash).length === 0) {
+                throw new Error("Hash invalid!")
+            }
+        } catch (error) {
+            console.error(error)
+            setTimeout(() => alert("Your link is invalid. Make sure not to delete anything from the original link."), 100)
+            reset();
+            return;
+        }
+        courseSelected = "Custom Quizzes";
+        chapterSelected = "Quizzes";
+        const title = Object.keys(processedHash)[0]
+        const quiz = Object.values(processedHash)[0]
+        topicSelected = title
+        if (data["Custom Quizzes"]) {
+            if (data["Custom Quizzes"]["Quizzes"]) {
+                data["Custom Quizzes"]["Quizzes"][title] = quiz
+            } else {
+                data["Custom Quizzes"]["Quizzes"] = {}
+                data["Custom Quizzes"]["Quizzes"][title] = quiz
+            }
+        } else {
+            data["Custom Quizzes"] = {}
+            data["Custom Quizzes"]["Quizzes"] = {}
+            data["Custom Quizzes"]["Quizzes"][title] = quiz
+        }
+        // Now that it is stored in the data, let's begin our quiz.
+        setUp();
+        return;
     }
     if (state === "selection" || !state) {
         $("#start").css("display", "block")

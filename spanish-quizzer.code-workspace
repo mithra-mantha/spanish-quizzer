@@ -8,5 +8,8 @@
 			"name": "quizzer",
 			"path": "../../mithra-projects/spanish-quizzer/quizzer"
 		}
-	]
+	],
+	"settings": {
+		"liveServer.settings.multiRootWorkspaceName": "spanish-quizzer"
+	}
 }
