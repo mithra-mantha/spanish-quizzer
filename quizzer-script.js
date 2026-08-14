@@ -122,10 +122,10 @@ const getSystemInfo = function () {
     let renderingEngine = "Unknown"
     if (window.chrome && typeof window.chrome === "object") {
         renderingEngine = "Blink"
-    } else if ("webkitConvertPointFromNodeInPage" in window || "webkitRequestAnimationFrame" in window) {
-        renderingEngine = "WebKit"
     } else if (window.netscape || "mozGetUserMedia" in navigator) {
         renderingEngine = "Gecko"
+    } else {
+        renderingEngine = "WebKit"
     }
     info["renderingEngine"] = renderingEngine
     return info;
@@ -339,8 +339,17 @@ const keyboardShortcut = function (event) {
 const storeInLocalStorage = function (state) {
     /* Why does everything start with "spanish-quizzer-"?
     localStorage is stored in the origin, the first part of the url encompassing the mydomain.extension.
-    Which means if I host something else on the same thing, I might override THEIR localStorage or vice versa.
-    */
+    Which means if I host something else on the same thing, I might override THEIR localStorage or vice versa.*/
+    if (state == undefined) {
+        throw new Error("State undefined!")
+    } 
+    if (state === "creation") {
+        localStorage.setItem("spanish-quizzer-textarea", $("#custom-quiz-input").val())
+        localStorage.setItem("spanish-quizzer-textarea-title", $("#custom-quiz-title-input").val())
+    } else {
+        localStorage.setItem("spanish-quizzer-textarea", "")
+        localStorage.setItem("spanish-quizzer-textarea-title", "")
+    }
     localStorage.setItem("spanish-quizzer-state", state)
     localStorage.setItem("spanish-quizzer-courseSelected", courseSelected)
     localStorage.setItem("spanish-quizzer-chapterSelected", chapterSelected)
@@ -388,13 +397,18 @@ const getLocalStorage = function () {
             "year": parseInt(localStorage.getItem("spanish-quizzer-year-last-visited")),
             "month": parseInt(localStorage.getItem("spanish-quizzer-month-last-visited")),
             "day": parseInt(localStorage.getItem("spanish-quizzer-day-last-visited")),
+            "textarea": localStorage.getItem("spanish-quizzer-textarea"),
+            "textareaTitle": localStorage.getItem("spanish-quizzer-textarea-title"),
         }
         if (Object.values(storage).includes(null)) {
             const nonEmptyValues = {state:"selection", "userCreatedQuizzes": JSON.parse(localStorage.getItem("spanish-quizzer-user-created-quizzes")),
             "dailyStreak": parseInt(localStorage.getItem("spanish-quizzer-daily-streak")),
             "year": parseInt(localStorage.getItem("spanish-quizzer-year-last-visited")),
             "month": parseInt(localStorage.getItem("spanish-quizzer-month-last-visited")),
-            "day": parseInt(localStorage.getItem("spanish-quizzer-day-last-visited")),}
+            "day": parseInt(localStorage.getItem("spanish-quizzer-day-last-visited")),
+            "textarea": localStorage.getItem("spanish-quizzer-textarea"),
+            "textareaTitle": localStorage.getItem("spanish-quizzer-textarea-title"),
+            }
             if (Object.values(nonEmptyValues).includes(null)) {
                 console.error("localStorage data has been corrupted", nonEmptyValues)
                 return {"state": "selection"}
@@ -623,9 +637,9 @@ const manualGrading = function (event) {
                 const location = insertLocations[i]
                 questionArray.splice(location, 1)
             }
-            }
-            if (questionRep[question] <= 0) {
-                questionArray.pop() //remove the question from the end
+        }
+        if (questionRep[question] <= 0) {
+            questionArray.pop() //remove the question from the end
         }
         streak = oldStreak + 1;
         questionsCorrect++
@@ -666,7 +680,7 @@ const reset = function () {
     $("#course-selection").append("<option value='' disabled selected hidden>Please select an option</option>");
     $("#chapter-selection").append("<option value='' disabled selected hidden>Please select an option</option>");
     $("#topic-selection").append("<option value='' disabled selected hidden>Please select an option</option>");
-    if (stateBeforeReset == "selection") {
+    if (stateBeforeReset === "selection") {
         // If the user is taking a quiz and presses 'reset' they don't want to see the selection page in between the animation.
         $("#selection").fadeOut(ANIMATION_LENGTH)
     } else {
@@ -897,8 +911,10 @@ const setUpQuestion = function (event={}) {
             $("#button-bar").fadeIn(ANIMATION_LENGTH)
         }, ANIMATION_LENGTH)
         $("#answer-input").val("");//sets the input box to empty
-        ($("#answer-input")[0]).focus();
-        ($("#answer-input")[0]).setSelectionRange(0, 0);
+        setTimeout(() => {
+            ($("#answer-input")[0]).focus();
+            ($("#answer-input")[0]).setSelectionRange(0, 0);
+        }, ANIMATION_LENGTH)
         //Autoselects the input box
     }
     storeInLocalStorage("question")
@@ -1004,7 +1020,13 @@ $(document).ready(function() {
         event.preventDefault()
         $("#custom-quiz-copy-link").prop("disabled", true).text("Copy link").attr("title", "Please first save your quiz.").off()
         $("#user-question-dialog")[0].showModal()
-    })
+        const oldTextArea = getLocalStorage().textarea
+        const oldTitle = getLocalStorage().textareaTitle
+        if (oldTextArea || oldTitle) {
+            $("#custom-quiz-input").val(oldTextArea)
+            $("#custom-quiz-title-input").val(oldTitle)
+        }
+    });
     $("#custom-quiz-input-submit").on("click", customQuizDialogSubmit);
     //Set up the keyboard shortcuts sign.
     const windowWidth = window.innerWidth
@@ -1035,6 +1057,11 @@ $(document).ready(function() {
     $(document).on("dragstart", function (event) {
         event.preventDefault()
     })
+    let timeoutId;
+    $(document).on("keydown", () => {
+        clearTimeout(timeoutId)
+        timeoutId = setTimeout(() => storeInLocalStorage("creation"), 300)
+    })
     const localStorageData = getLocalStorage()
     if (localStorageData.userCreatedQuizzes != undefined) {
         if (Object.keys(localStorageData.userCreatedQuizzes).length > 0) {
@@ -1047,7 +1074,7 @@ $(document).ready(function() {
     const differenceInDays = Math.floor((today - lastVisited) / (1000 * 60 * 60 * 24));
     if (differenceInDays > 1) {
         dailyStreak = 0
-    } else if (differenceInDays == 1){
+    } else if (differenceInDays === 1){
         dailyStreak = localStorageData.dailyStreak + 1;
     } else {
         dailyStreak = localStorageData.dailyStreak
@@ -1096,10 +1123,13 @@ $(document).ready(function() {
         setUp();
         return;
     }
-    if (state === "selection" || !state) {
+    if (state === "selection" || state === "creation" || !state) {
         $("#start").css("display", "block")
         $("#start-button").one("click", askUserForCourse)
         $("#selection").css("display", "none")
+        if (state === "creation") {
+            $("#custom-quiz-button").trigger("click")
+        }
         return;
     } else {
         courseSelected = localStorageData.courseSelected;
@@ -1193,7 +1223,7 @@ $(document).ready(function() {
                 $("#manual-grading").css("display", "inline-block")
             }
         } else {
-            throw new Error("Error Document.ready function. LocalStorageData state neither question nor answer nor selection nor null/undefined.");
+            throw new Error("Error Document.ready function. LocalStorageData state neither question nor answer nor selection nor creation nor null/undefined.");
         }
     }
 });
