@@ -7,6 +7,9 @@ Welcome to the brain of the spanish quizzer! Note that the "data" object is a gl
 /*
 Notes for future:
 If the user has an existing quiz make sure to remind them that they are overriding it with a new quiz.
+
+Add a saved! thing that notifies the user when they successfully save it, and that disappears the moment they modify something.
+Same for file thing.
 */
 //Used to access the answers from the data object.
 let courseSelected = ""
@@ -434,6 +437,16 @@ const shiftAll = function () {
         })
     }
 }
+const exportData = function (data, filename) {
+    const blob = new Blob([data], {type:"application/json"})
+    const url = URL.createObjectURL(blob)
+    // Create a link and add it to the DOM, then click it and immediately remove it.
+    const link = $(`<a href=${url} download=${filename}></a>`)
+    link.appendTo("body")
+    link[0].click();
+    link.remove();
+    URL.revokeObjectURL(url);
+}
 const processUserQuiz = function (string) {
     if (string.trim().length === 0) {
         return "You didn't enter anything."
@@ -490,6 +503,7 @@ const customQuizDialogSubmit = function (event) {
     if (typeof processedQuiz === "string") {
         $("#custom-quiz-invalid-warning").text("Error: " + processedQuiz)
         $("#custom-quiz-copy-link").prop("disabled", true).attr("title", "Please fix the issue and save the quiz first.").off()
+        $("#custom-quiz-export").prop("disabled", true).attr("title", "Please fix the issue and save the quiz first.").off()
         return;
     } else if (typeof processedQuiz === "object") {
         const title = $("#custom-quiz-title-input").val()
@@ -508,22 +522,22 @@ const customQuizDialogSubmit = function (event) {
             data["Custom Quizzes"] = {}
             data["Custom Quizzes"]["Quizzes"] = {}
             data["Custom Quizzes"]["Quizzes"][title] = processedQuiz
-            navigator.storage.persisted().then((wasAccepted) => {
-                if (!wasAccepted) {
-                    navigator.storage.persist().then(isAccepted => {
-                        if (!isAccepted) {
-                            if (getSystemInfo().renderingEngine === "WebKit") {
-                                alert("Permanent save failed.\n\nThis means that your custom quizzes may be deleted occasionally. It is highly recommended to copy the link and save it so that your custom quiz isn't lost forever.")
-                            }
-                        }
-                    })
-                }
-            });
         }
+        navigator.storage.persisted().then((wasAccepted) => {
+            if (!wasAccepted) {
+                navigator.storage.persist().then(isAccepted => {
+                    if (!isAccepted) {
+                        if (getSystemInfo().renderingEngine === "WebKit") {
+                            alert("Permanent save failed.\n\nThis means that your custom quizzes may be deleted occasionally. It is highly recommended to copy the link and save it so that your custom quiz isn't lost forever.")
+                        }
+                    }
+                })
+            }
+        });
         const encodedQuiz = LZString.compressToEncodedURIComponent(JSON.stringify({[title]:processedQuiz}))
         let baseUrl = window.location.origin + window.location.pathname
         if (baseUrl.endsWith("/")) {
-            baseUrl = baseUrl.slice(0, -1)
+            baseUrl = baseUrl.slice(0, -1) // Otherwise the browser would thing that the hash is actually a location and throw a 404 Not Found error.
         }
         const fullUrl = `${baseUrl}#${encodedQuiz}`
         if (fullUrl.length < 2048) {
@@ -538,12 +552,19 @@ const customQuizDialogSubmit = function (event) {
                     alert("Copying failed. Please copy this URL manually: " + fullUrl)
                 });
             })
+            $("#custom-quiz-export").removeAttr("disabled").removeAttr("title").off("click").on("click", (event) => {
+                // We don't compress it for readability purposes.
+                exportData(JSON.stringify({[title]:processedQuiz}), `${title.replaceAll(" ", "_")}.quiz.json`)
+                $("#custom-quiz-export").text("Successfully exported!")
+                setTimeout(() => $("#custom-quiz-export").text("Export as file"), 5000)
+            })
         } else {
             $("#custom-quiz-invalid-warning").text("Your quiz is too long to turn into a link.")
             $("#custom-quiz-copy-link").off().prop("disabled", true).attr("title", "Your quiz is too long to turn into a link. To generate a link, please shorten it.")
-
         }
-        storeInLocalStorage("selection");
+        storeInLocalStorage("creation")
+        $("#custom-quiz-input-submit").text("Saved!")
+        setTimeout(() => $("#custom-quiz-input-submit").text("Save"), 5000)
     }
 }
 const findQuestionSpots = function (question, array) {
@@ -992,6 +1013,8 @@ $(document).ready(function() {
     $("#custom-quiz-button").on("click", event => {
         event.preventDefault()
         $("#custom-quiz-copy-link").prop("disabled", true).text("Copy link").attr("title", "Please first save your quiz.").off()
+        $("#custom-quiz-export").prop("disabled", true).text("Export as file").attr("title", "Please first save your quiz.").off()
+        $("#custom-quiz-input-submit").text("Save")
         $("#user-question-dialog")[0].showModal()
         const oldTextArea = getLocalStorage().textarea
         const oldTitle = getLocalStorage().textareaTitle
@@ -1001,8 +1024,8 @@ $(document).ready(function() {
         }
     });
     $("#user-question-dialog").on("click", function (event) {
-        storeInLocalStorage("selection")
         if (event.target === this) {
+            storeInLocalStorage("selection")
             this.close();
         }
     });

@@ -205,6 +205,9 @@ summary:hover {
     bottom: 30px;
     left: 50%;
     transform: translateX(-50%);
+    -ms-user-select: text;
+    -webkit-user-select: text;
+    user-select: text;
 }
 #credits {
     display: none;
