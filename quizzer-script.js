@@ -47,7 +47,7 @@ const getCurrentQuestion = function () {
     return $("#quiz-box").attr("data-current-question")
 }
 const changeCurrentQuestion = function (newQuestion) {
-    return $("#quiz-box").attr("data-current-question", newQuestion)
+    $("#quiz-box").attr("data-current-question", newQuestion)
 }
 const refreshStreak = function (newStreak) {
     $("#streak-num").text(newStreak);
@@ -136,39 +136,9 @@ const processAnswer = function (answer, removePunctuation=true, removeSpaces=tru
         answer = answer.replaceAll(" ", "") //Removes all spaces.
     }
     //Remove all other weird symbols.
-    answer = answer.replaceAll("[", "")
-    answer = answer.replaceAll("]", "")
-    answer = answer.replaceAll(":", "")
-    answer = answer.replaceAll(";", "")
-    answer = answer.replaceAll("{", "")
-    answer = answer.replaceAll("}", "")
-    answer = answer.replaceAll("\\", "")
-    answer = answer.replaceAll("/", "")
-    answer = answer.replaceAll(")", "")
-    answer = answer.replaceAll("(", "")
-    answer = answer.replaceAll("|", "")
-    answer = answer.replaceAll("$", "")
-    answer = answer.replaceAll("*", "")
-    answer = answer.replaceAll("@", "")
-    answer = answer.replaceAll("#", "")
-    answer = answer.replaceAll("%", "")
-    answer = answer.replaceAll("^", "")
-    answer = answer.replaceAll("&", "")
-    answer = answer.replaceAll("_", "")
-    answer = answer.replaceAll("~", "")
-    answer = answer.replaceAll("`", "")
-    answer = answer.replaceAll("+", "")
-    answer = answer.replaceAll("=", "")
-    answer = answer.replaceAll("<", "")
-    answer = answer.replaceAll(">", "")
-    answer = answer.replaceAll("-", "")
+    answer = answer.replace(/[^a-z0-9áéíóúüñ!?¡¿.,]/gi, "")
     if (removePunctuation) {
-        answer = answer.replaceAll("?", "")
-        answer = answer.replaceAll("!", "")
-        answer = answer.replaceAll("¿", "")
-        answer = answer.replaceAll("¡", "")
-        answer = answer.replaceAll(",", "")
-        answer = answer.replaceAll(".", "")
+        answer = answer.replace(/[!?¡¿.,]/gi, "")
     }
     return answer
 }
@@ -282,6 +252,7 @@ const keyboardShortcut = function (event) {
                             $("#manual-grading").trigger("click", {ogResult: true})
                         }
                     }
+                    break;
         }
         }
     } else {
@@ -343,35 +314,37 @@ const storeInLocalStorage = function (state) {
     if (state == undefined) {
         throw new Error("State undefined!")
     } 
-    if (state === "creation") {
-        localStorage.setItem("spanish-quizzer-textarea", $("#custom-quiz-input").val())
-        localStorage.setItem("spanish-quizzer-textarea-title", $("#custom-quiz-title-input").val())
-    } else {
-        localStorage.setItem("spanish-quizzer-textarea", "")
-        localStorage.setItem("spanish-quizzer-textarea-title", "")
-    }
-    localStorage.setItem("spanish-quizzer-state", state)
-    localStorage.setItem("spanish-quizzer-courseSelected", courseSelected)
-    localStorage.setItem("spanish-quizzer-chapterSelected", chapterSelected)
-    localStorage.setItem("spanish-quizzer-topicSelected", topicSelected)
-    localStorage.setItem("spanish-quizzer-answers", JSON.stringify(answers))
-    localStorage.setItem("spanish-quizzer-userAnswer", userAnswer)
-    localStorage.setItem("spanish-quizzer-questionRep", JSON.stringify(questionRep))
-    localStorage.setItem("spanish-quizzer-streak", JSON.stringify(streak))
-    localStorage.setItem("spanish-quizzer-oldStreak", JSON.stringify(oldStreak))
-    localStorage.setItem("spanish-quizzer-currentQuestion", getCurrentQuestion())
-    localStorage.setItem("spanish-quizzer-questionArray", JSON.stringify(getQuestionArray()))
-    localStorage.setItem("spanish-quizzer-totalQuestions", String(totalQuestions))
-    localStorage.setItem("spanish-quizzer-questionsCorrect", String(questionsCorrect))
-    localStorage.setItem("spanish-quizzer-insertLocations", JSON.stringify(insertLocations))
-    localStorage.setItem("spanish-quizzer-$resultText", $("#result").text())
-    localStorage.setItem("spanish-quizzer-daily-streak", String(dailyStreak))
-    localStorage.setItem("spanish-quizzer-user-created-quizzes", JSON.stringify(data["Custom Quizzes"] ? data["Custom Quizzes"] : {}))
-    //Store the date
     const now = new Date()
-    localStorage.setItem("spanish-quizzer-year-last-visited", String(now.getFullYear()))
-    localStorage.setItem("spanish-quizzer-month-last-visited", String(now.getMonth()))
-    localStorage.setItem("spanish-quizzer-day-last-visited", String(now.getDate()));
+    let keyValue = {
+        "spanish-quizzer-textarea": state === "creation" ? $("#custom-quiz-input").val() : "",
+        "spanish-quizzer-textarea-title": state === "creation" ? $("#custom-quiz-title-input").val() : "",
+        "spanish-quizzer-state": state,
+        "spanish-quizzer-courseSelected": courseSelected,
+        "spanish-quizzer-chapterSelected": chapterSelected,
+        "spanish-quizzer-topicSelected": topicSelected,
+        "spanish-quizzer-answers": JSON.stringify(answers),
+        "spanish-quizzer-userAnswer": userAnswer,
+        "spanish-quizzer-questionRep": JSON.stringify(questionRep),
+        "spanish-quizzer-streak": JSON.stringify(streak),
+        "spanish-quizzer-oldStreak": JSON.stringify(oldStreak),
+        "spanish-quizzer-currentQuestion": getCurrentQuestion(),
+        "spanish-quizzer-questionArray": JSON.stringify(getQuestionArray()),
+        "spanish-quizzer-totalQuestions": String(totalQuestions),
+        "spanish-quizzer-questionsCorrect": String(questionsCorrect),
+        "spanish-quizzer-insertLocations": JSON.stringify(insertLocations),
+        "spanish-quizzer-$resultText": $("#result").text(),
+        "spanish-quizzer-daily-streak": String(dailyStreak),
+        "spanish-quizzer-user-created-quizzes": JSON.stringify(data["Custom Quizzes"] ? data["Custom Quizzes"] : {}),
+        // Store the date.
+        "spanish-quizzer-year-last-visited": String(now.getFullYear()),
+        "spanish-quizzer-month-last-visited": String(now.getMonth()),
+        "spanish-quizzer-day-last-visited": String(now.getDate()),
+    }
+    for (const key in keyValue) {
+        if (localStorage.getItem(key) !== keyValue[key]) {
+            localStorage.setItem(key, keyValue[key])
+        }
+    }
     //This stores EVERYTHING in localstorage, useful or not.
 }
 const getLocalStorage = function () {
@@ -1027,6 +1000,16 @@ $(document).ready(function() {
             $("#custom-quiz-title-input").val(oldTitle)
         }
     });
+    $("#user-question-dialog").on("click", function (event) {
+        storeInLocalStorage("selection")
+        if (event.target === this) {
+            this.close();
+        }
+    });
+    $("#close-dialog").on("click", function () {
+        storeInLocalStorage("selection")
+        $("#user-question-dialog")[0].close();
+    });
     $("#custom-quiz-input-submit").on("click", customQuizDialogSubmit);
     //Set up the keyboard shortcuts sign.
     const windowWidth = window.innerWidth
@@ -1059,9 +1042,13 @@ $(document).ready(function() {
     })
     let timeoutId;
     $(document).on("keydown", () => {
+        // This only saves if the user pauses for 300ms, which helps save resources.
+        if (!$("#user-question-dialog")[0].open) {
+            return;
+        }
         clearTimeout(timeoutId)
         timeoutId = setTimeout(() => storeInLocalStorage("creation"), 300)
-    })
+    });
     const localStorageData = getLocalStorage()
     if (localStorageData.userCreatedQuizzes != undefined) {
         if (Object.keys(localStorageData.userCreatedQuizzes).length > 0) {

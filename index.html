@@ -131,16 +131,16 @@
             </div>
         </div>
     </div>
-    <dialog id="user-question-dialog" onclick="if (event.target === this) {this.close()}">
+    <dialog id="user-question-dialog" class="no-listener-clear">
         <div id="dialog-box">
-            <button onclick="document.getElementById('user-question-dialog').close()" aria-label="Close the popup dialog" id="close-dialog">✖</button>
+            <button aria-label="Close the popup dialog" id="close-dialog" class="no-listener-clear">✖</button>
         <h1>Custom quiz</h1>
         <div>
             Enter your custom quiz below in the following format:
             <div> <br>
                 ## Question <br>
                 == Answer1 <br>
-                == Answer2 <br>
+                == Answer2 <br> 
                 == More correct answers <br>
                 ## Question 2 <br>
                 == The answer to question2 <br>
@@ -168,7 +168,7 @@
         </form>
         </div>
     </dialog>
-    <p id="version">V101</p>
+    <p id="version" aria-hidden="true">V102</p>
     <script data-goatcounter="https://mithra-mantha.goatcounter.com/count"
         async src="https://gc.zgo.at/count.js"></script> <!--This is to count how many viewers go on the site...it does NOT track them across the web, it just tells me how many people and from what countries and browsers.-->
 </body>
