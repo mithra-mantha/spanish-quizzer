@@ -68,7 +68,7 @@ body {
 #manual-grading {
     display: none;
     font-size: 2em;
-    margin-top: 20px;
+    margin-top: 10px;
 }
 .topic-selection {
     font-size: 2em;
@@ -126,6 +126,7 @@ body {
 }
 .char, #shift {
     font-size: 1.5em;
+    display: inline-block;
 }
 #logo {
     position: absolute;
@@ -136,7 +137,7 @@ body {
 #confetti {
     display: none;
 }
-button {
+button, #upload-file-form label {
     font-family: Arial, Helvetica, sans-serif;
     border-radius: 4px;
     box-sizing: border-box;
@@ -145,8 +146,11 @@ button {
     background-color: var(--button-bg-color);
     color: black;
     font-size: 2em;
+    display: block;
+    width: fit-content;
+    margin: auto;
 }
-button:hover {
+button:hover, #upload-file-form label:hover {
     filter: brightness(80%);
     cursor: pointer;
 }
@@ -201,10 +205,6 @@ summary:hover {
     font-size: 2em;
 }
 #contacts {
-    position: absolute;
-    bottom: 30px;
-    left: 50%;
-    transform: translateX(-50%);
     -ms-user-select: text;
     -webkit-user-select: text;
     user-select: text;
@@ -267,4 +267,24 @@ dialog::backdrop {
     right: 10px;
     top: 10px;
     font-size: 1em;
+}
+/*
+The upload file button is a bit of a headache, because browsers don't let you style it.
+The easiest way is to hide the upload file button, and make the <label> look like the upload file button, and the browser will automatically
+redirect it to the invisible file input which will open up the selection. Custom javascript will show the file on the screen.
+*/
+#upload-file {
+    position: absolute;
+    width: 0;
+    height: 0;
+}
+#upload-file-form label {
+    margin-top: 10px;
+}
+#uploaded-file-sign {
+    margin-bottom: 10px;
+    font-size: 1.5em;
+}
+#uploaded-file-invalid-warning {
+    color: red;
 }

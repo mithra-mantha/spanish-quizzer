@@ -2,14 +2,11 @@
 // @ts-check
 // global LZString
 /*
-Welcome to the brain of the spanish quizzer! Note that the "data" object is a global variable and so are correctFeedback, wrongFeedback and streakLossFeedback because they are in data.js which is loaded in the html before this script is. jQuery is loaded in here too.
+Welcome to the brain of the spanish quizzer! Note that the "data" object is a global variable and so are correctFeedback, incorrectFeedback and streakLossFeedback because they are in data.js which is loaded in the html before this script is. jQuery is loaded in here too.
 */ 
 /*
 Notes for future:
 If the user has an existing quiz make sure to remind them that they are overriding it with a new quiz.
-
-Add a saved! thing that notifies the user when they successfully save it, and that disappears the moment they modify something.
-Same for file thing.
 */
 //Used to access the answers from the data object.
 let courseSelected = ""
@@ -655,6 +652,9 @@ const reset = function () {
     $("#course-selection").empty();
     $("#chapter-selection").empty();
     $("#topic-selection").empty();
+    // Clear all inputs.
+    $("input").val("")
+    $("#upload-file").trigger("change")
     refreshStreak(0);
     //Reset all variables.
     streak = 0;
@@ -928,7 +928,7 @@ const setUp = function (event={}) {
         $("#streak").fadeIn(ANIMATION_LENGTH)
         $("#button-bar").fadeIn(ANIMATION_LENGTH)
         $("#form").fadeIn(ANIMATION_LENGTH)
-    })
+    });
     $('#form').on("submit", checkAnswer)
     $("#next-question").on("click", setUpQuestion)
     $("#shift").on("click", shiftAll);
@@ -1009,6 +1009,14 @@ const askUserForCourse = function () {
     $("#course-selection-form").one("submit", askUserForChapter)
 }
 $(document).ready(function() {
+    window.onerror = function (message, source, lineno, colno, error) {
+        alert(`
+            ${error}
+            ${message}
+            from ${source}
+            at ${lineno}:${colno}
+        `)
+    }
     $("#reset").on("click", resetButton)
     $("#custom-quiz-button").on("click", event => {
         event.preventDefault()
@@ -1034,6 +1042,57 @@ $(document).ready(function() {
         $("#user-question-dialog")[0].close();
     });
     $("#custom-quiz-input-submit").on("click", customQuizDialogSubmit);
+    $("#upload-file").on("change", function () {
+        $("#uploaded-file-sign").text(this.files.length > 0 ? this.files[0].name : "No files chosen")
+    })
+    $("#uploaded-file-submit").on("click", function (event) {
+        event.preventDefault();
+        const file = $("#upload-file")[0].files[0];
+        if (!file) {
+            return;
+        }
+        if (!file.name.endsWith(".quiz.json") && !/\.quiz(\s*\(\d+\))?\.json$/i.test(file.name)) {
+            $("#uploaded-file-invalid-warning").text("You've uploaded a invalid file. Make sure to only upload files that end with .quiz.json.")
+            return;
+        }
+        file.text()
+        .then(fileContent => {
+            try {
+                const parsedContent = JSON.parse(fileContent)
+                if (!parsedContent || typeof parsedContent !== "object" || Object.keys(parsedContent).length === 0) {
+                    throw new Error("Extracted text invalid.")
+                }
+                courseSelected = "Custom Quizzes";
+                chapterSelected = "Quizzes";
+                const title = Object.keys(parsedContent)[0]
+                const quiz = Object.values(parsedContent)[0]
+                topicSelected = title
+                if (data["Custom Quizzes"]) {
+                    if (data["Custom Quizzes"]["Quizzes"]) {
+                        data["Custom Quizzes"]["Quizzes"][title] = quiz
+                    } else {
+                        data["Custom Quizzes"]["Quizzes"] = {}
+                        data["Custom Quizzes"]["Quizzes"][title] = quiz
+                    }
+                } else {
+                    data["Custom Quizzes"] = {}
+                    data["Custom Quizzes"]["Quizzes"] = {}
+                    data["Custom Quizzes"]["Quizzes"][title] = quiz
+                }
+                // Now that it is stored in the data, let's begin our quiz.
+                $("#start").css("display", "none")
+                setUp();
+                return;
+            } catch (error) {
+                $("#uploaded-file-invalid-warning").text("Your file contains invalid text. This could be because it is corrupted, or you might have made edits to the file.")
+                console.error("Parsing failed.", error)
+            }
+        })
+        .catch(error => {
+            $("#uploaded-file-invalid-warning").text("Your file is unreadable.")
+            console.error("Failed to extract text content from file.", error);
+        });
+    })
     //Set up the keyboard shortcuts sign.
     const windowWidth = window.innerWidth
     const windowHeight = window.innerHeight
@@ -1042,7 +1101,7 @@ $(document).ready(function() {
     }
     $("audio").each(function (index, element) {
         element.volume = 0.2;
-    }) //Sets the volume of the audio to 0.2, which is just above "just right".
+    }) //Sets the volume of the audio to 0.2, which is just above "just right", so the user can decrease the volume if necessary.
     if (getSystemInfo().device !== "Desktop") {
         $("#keyboard-shortcuts")[0].remove()
         $("#logo")[0].remove()
@@ -1051,26 +1110,36 @@ $(document).ready(function() {
         alert("You are on a non-recommended device. It is strongly recommended to use a laptop instead.")}, 50)
     }
     $(document).on("cut", function (event) {
-        event.preventDefault()
-    })
-    $(document).on("copy", function (event) {
-        event.preventDefault()
-    })
-    $(document).on("paste", function (event) {
-        event.preventDefault()
-        alert("Nice try! You have to type the answer, not copy and paste it.")
-    })
-    $(document).on("dragstart", function (event) {
-        event.preventDefault()
-    })
-    let timeoutId;
-    $(document).on("keydown", () => {
-        // This only saves if the user pauses for 300ms, which helps save resources.
-        if (!$("#user-question-dialog")[0].open) {
-            return;
+        if ($("#form").css("display") !== "none") {
+            event.preventDefault()
         }
+    });
+    $(document).on("copy", function (event) {
+        if ($("#form").css("display") !== "none") {
+            event.preventDefault()
+        }
+    });
+    $(document).on("paste", function (event) {
+        if ($("#form").css("display") !== "none") {
+            event.preventDefault()
+            alert("Nice try! You have to type the answer, not copy and paste it.")
+        }
+    });
+    $(document).on("dragstart", function (event) {
+        if ($("#form").css("display") !== "none") {
+            event.preventDefault()
+        }
+    });
+    let timeoutId;
+    $("#custom-quiz-input").on("input", () => {
+        // This only saves if the user pauses for 300ms, which helps save resources.
         clearTimeout(timeoutId)
         timeoutId = setTimeout(() => storeInLocalStorage("creation"), 300)
+        if ($("#custom-quiz-input-submit").text() === "Saved!") {
+            $("#custom-quiz-input-submit").text("Save")
+            $("#custom-quiz-copy-link").prop("disabled", true).text("Copy link").attr("title", "Please first save your quiz.").off()
+            $("#custom-quiz-export").prop("disabled", true).text("Export as file").attr("title", "Please first save your quiz.").off()
+        }
     });
     const localStorageData = getLocalStorage()
     if (localStorageData.userCreatedQuizzes != undefined) {
@@ -1131,6 +1200,7 @@ $(document).ready(function() {
         }
         // Now that it is stored in the data, let's begin our quiz.
         setUp();
+        $("#reset").css("display", "revert")
         return;
     }
     if (state === "selection" || state === "creation" || !state) {

@@ -124,6 +124,18 @@
                 <span id="daily-streak" class="streak">0</span><img id="daily-streak-flaming-icon" class="flaming-icon" src="assets/flaming-streak-icon.png" title="Look at your amazing streak!" alt="Flaming streak icon" width="70px">
                 </span>
             </p>
+            <details>
+                <summary>Upload custom quiz here</summary>
+                <form id="upload-file-form">
+                    <label for="upload-file">
+                        Upload here
+                    </label>
+                    <div id="uploaded-file-sign">No file chosen</div>
+                    <input id="upload-file" type="file" aria-label="Upload a file here" accept=".json, .quiz.json" required class="no-listener-clear">
+                    <span id="uploaded-file-invalid-warning"></span>
+                    <button type="submit" id="uploaded-file-submit" class="no-listener-clear">Submit</button><br>
+                </form>
+            </details>
             <p>Your progress will be saved, even if you exit/reload the page later. If you want to restart from the beginning, press "reset".</p>
             <div id="contacts">
                 <h2>Contacts:</h2>
@@ -169,7 +181,7 @@
         </form>
         </div>
     </dialog>
-    <p id="version" aria-hidden="true">V103</p>
+    <p id="version" aria-hidden="true">V104</p>
     <script data-goatcounter="https://mithra-mantha.goatcounter.com/count"
         async src="https://gc.zgo.at/count.js"></script> <!--This is to count how many viewers go on the site...it does NOT track them across the web, it just tells me how many people and from what countries and browsers.-->
 </body>

@@ -2,7 +2,9 @@
 This is a Spanish Quizzer to quiz you on your skills for the Senderos Spanish curriculum. Fun fact: All the code here was written 100% without AI(although it was used to debug). It also works 100% without internet.
 
 ## Key features
-You select a course, chapter, and topic from the Senderos Curriculum. It quizzes you multiple times until you consistently get it right. There is a streak counter as well as "I got it right/wrong" buttons in case the system made a mistake. There is also an autosave feature so even if you reload or close the tab your progress is saved. If you want to restart from the beginning, you have to press "reset". It also alerts you if you got the answer confused with another question.
+You select a course, chapter, and topic from the Senderos Curriculum. It quizzes you multiple times until you consistently get it right. There is a streak counter as well as "I got it right/wrong" buttons in case the system made a mistake. There is also an autosave feature so even if you reload or close the tab your progress is saved. If you want to restart from the beginning, you have to press "reset". It also alerts you if you got the answer confused with another question. 
+
+If you don't like the preloaded questions, you can create your own by typing into a field with ## for question and == for the answer, and save it. You can also generate a link and share it or back it up on your device as a .json file.
 
 ## Keyboard shortcuts
 There are multiple keyboard shorcuts installed to make it easy to operate the site.
@@ -16,7 +18,9 @@ There are multiple keyboard shorcuts installed to make it easy to operate the si
 
 ## How it works
 
-This currently uses jQuery, and the traditional HTML-CSS-JavaScript trio. Because JavaScript has no native wait-until block, it uses a pair of event listeners and is almost entirely function-based. The first event listener sets up the question, which then makes it possible for the user to submit and trigger the second, which then sets up the NEXT QUESTION button that then triggers the first event listener, and so on until the user has finished. The autosave feature works by using the localStorage browser API. The confusion alert feature works by looping through the questions for that topic and using .split() to find the area within the quotation marks.'
+This currently uses jQuery, and the traditional HTML-CSS-JavaScript trio as well as LZString which is a string compression library. Because JavaScript has no native wait-until block, it uses a pair of event listeners and is almost entirely function-based. The first event listener sets up the question, which then makes it possible for the user to submit and trigger the second, which then sets up the NEXT QUESTION button that then triggers the first event listener, and so on until the user has finished. 
+
+The autosave feature works by using the localStorage browser API. The confusion alert feature works by looping through the questions for that topic and using .split() to find the area within the quotation marks.' The link generator works by using JSON.stringify() on your custom quiz and then compressing it using LZString and appending it to the url as a hash(example: www.mithra-mantha.github.io/spanish-quizzer#eiokgijeiojiekiji...). Then, when you open the link if there's a hash it decompresses and parses it into a valid quiz!
 
 ## Details(For those of you who want to know the exact steps)
 This is a static site, which means that all the code is run client-side. While that does mean that anyone can read the code, it's simply a quizzer application so it doesn't matter anyway.
@@ -60,3 +64,5 @@ The current question and the array of questions are defined as data-* attributes
 3. Depending on their state-
     * Question: Proceed as normal. Set the normal stuff(again, using code copy pasted from setUpQuestion because triggering it directly requires an event object with the .preventDefault() method).
     * Answer: Make the question disappear and trigger checkAnswer(). Run a smaller version of checkAnswer to figure out whether the user got it correct or wrong. However, no variable modification is needed because the variables were saved AFTER they were modified.
+
+
