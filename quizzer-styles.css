@@ -11,9 +11,6 @@
 body {
     text-align: center;
     font-family: Verdana, Roboto, Arial, Calibri, Georgia, sans-serif;
-    -webkit-user-select: none;
-    -ms-user-select: none;
-    user-select: none;
 }
 #quiz-box {
     width: 90%;
@@ -54,6 +51,9 @@ body {
     font-size: 1.5em;
     margin-top: 50px;
     margin-bottom: 20px;
+    -webkit-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
 }
 .answer-form {
     text-align: center;
@@ -247,6 +247,7 @@ textarea {
     font-family: Verdana, Roboto, Arial, Calibri, Georgia, sans-serif;
 }
 dialog div div {
+    /* This is the text inside the example in the dialog.*/
     text-align: left; 
     font-style: italic; 
     font-family: Arial, Helvetica, sans-serif;

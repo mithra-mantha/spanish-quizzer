@@ -1,13 +1,9 @@
 "use strict";
 // @ts-check
-// global LZString
 /*
 Welcome to the brain of the spanish quizzer! Note that the "data" object is a global variable and so are correctFeedback, incorrectFeedback and streakLossFeedback because they are in data.js which is loaded in the html before this script is. jQuery is loaded in here too.
-*/ 
-/*
-Notes for future:
-If the user has an existing quiz make sure to remind them that they are overriding it with a new quiz.
 */
+
 //Used to access the answers from the data object.
 let courseSelected = ""
 let chapterSelected = ""
@@ -71,7 +67,7 @@ const refreshStreak = function (newStreak) {
     streak = newStreak
 }
 const shuffleArray = function (array){
-    let shuffled = array
+    let shuffled = array.slice()
     let j;
     for (let i = shuffled.length - 1; i > 0; i--) {
         j = Math.floor(Math.random() * (i + 1));
@@ -512,7 +508,19 @@ const customQuizDialogSubmit = function (event) {
         if (data["Custom Quizzes"]) {
             if (data["Custom Quizzes"]["Quizzes"]) {
                 // If the user has already created a couple of question sets, add this to that.
-                data["Custom Quizzes"]["Quizzes"][title] = processedQuiz
+                if (!(title in data["Custom Quizzes"]["Quizzes"]) || JSON.stringify(data["Custom Quizzes"]["Quizzes"][title]) === JSON.stringify(processedQuiz)) {
+                    data["Custom Quizzes"]["Quizzes"][title] = processedQuiz;
+                } else {
+                    const overrideOld = confirm(`There is already another quiz called "${title}". Would you like to replace the old one?
+Press OK to replace the old set.
+Press Cancel to keep the old set(The new set will not be saved until you change its title and save it again.)`)
+                    if (overrideOld) {
+                        data["Custom Quizzes"]["Quizzes"][title] = processedQuiz;
+                    } else {
+                        $("#custom-quiz-invalid-warning").text("Please change the title and then save your question set.");
+                        return;
+                    }
+                }
             }
         } else {
             // Create a new Custom Quizzes object in data if there isn't one.
@@ -565,11 +573,12 @@ const customQuizDialogSubmit = function (event) {
     }
 }
 const findQuestionSpots = function (question, array) {
-    // This returns either an array of indexes to insert, or undefined.
-    // It returns an array of 2
+    // This returns an array of indexes to insert, typically two although if there aren't enough spots it can be 1 or 0.
     if (!array.includes(question)) {
         if (array.length >= 6) {
             return [2, 5];
+        } else if (array.length >= 3) {
+            return [2];
         } else {
             return [];
         };
@@ -586,7 +595,7 @@ const findQuestionSpots = function (question, array) {
         if (checkArea.includes(question)) {
             continue;
         }
-        if (candidates.length && candidates[candidates.length - 1] > i - bufferLength) {
+        if (candidates.length && candidates[candidates.length - 1] >= i - bufferLength) {
             //If this is too close to another candidate, return 0.
             continue;
         }
@@ -640,6 +649,7 @@ const manualGrading = function (event) {
     $("#next-question").trigger("click");
 }
 const reset = function () {
+    clearTimeout();
     let stateBeforeReset = "quiz"
     if ($("#selection").css("display") != "none") {
         stateBeforeReset = "selection"
@@ -655,6 +665,8 @@ const reset = function () {
     // Clear all inputs.
     $("input").val("")
     $("#upload-file").trigger("change")
+    $("#uploaded-file-invalid-warning").text("");
+    $("#next-question").text("Next Question")
     refreshStreak(0);
     //Reset all variables.
     streak = 0;
@@ -668,6 +680,8 @@ const reset = function () {
     questionsCorrect = 0;
     totalQuestions = 0;
     $("*:not(.no-listener-clear)").off(); // KILL THE EVENT LISTENERS!
+    $(document).off("keydown", keyboardShortcut)
+    $(document).off("click", ".char")
     //Clear localStorage.
     clearLocalStorage();
     // Make sure to add the default required element though.
@@ -887,7 +901,9 @@ const setUpQuestion = function (event={}) {
             $("#confetti").css("display", "none")
         }, 4000)
         setTimeout(function () {
-            reset()
+            if ($("#quiz-title").text() === "You're done!") {
+                reset()
+            }
         }, 8000)
         return;
     } else {
@@ -929,9 +945,9 @@ const setUp = function (event={}) {
         $("#button-bar").fadeIn(ANIMATION_LENGTH)
         $("#form").fadeIn(ANIMATION_LENGTH)
     });
-    $('#form').on("submit", checkAnswer)
-    $("#next-question").on("click", setUpQuestion)
-    $("#shift").on("click", shiftAll);
+    $('#form').off().on("submit", checkAnswer)
+    $("#next-question").off().on("click", setUpQuestion)
+    $("#shift").off().on("click", shiftAll);
     const question = questionArray[0]
     changeCurrentQuestion(question)
     $("#question").text(question)
@@ -1043,7 +1059,13 @@ $(document).ready(function() {
     });
     $("#custom-quiz-input-submit").on("click", customQuizDialogSubmit);
     $("#upload-file").on("change", function () {
-        $("#uploaded-file-sign").text(this.files.length > 0 ? this.files[0].name : "No files chosen")
+        if (this.files.length > 0) {
+            $("#uploaded-file-sign").text(this.files[0].name)
+            $("#uploaded-file-submit").prop("disabled", false).attr("title", "");
+        } else {
+            $("#uploaded-file-sign").text("No files chosen")
+            $("#uploaded-file-submit").prop("disabled", false).attr("title", "Please first upload a file.");
+        }
     })
     $("#uploaded-file-submit").on("click", function (event) {
         event.preventDefault();
@@ -1081,6 +1103,7 @@ $(document).ready(function() {
                 }
                 // Now that it is stored in the data, let's begin our quiz.
                 $("#start").css("display", "none")
+                $("#reset").css("display", "revert")
                 setUp();
                 return;
             } catch (error) {
@@ -1110,23 +1133,23 @@ $(document).ready(function() {
         alert("You are on a non-recommended device. It is strongly recommended to use a laptop instead.")}, 50)
     }
     $(document).on("cut", function (event) {
-        if ($("#form").css("display") !== "none") {
+        if (!$("#form").is(":hidden")) {
             event.preventDefault()
         }
     });
     $(document).on("copy", function (event) {
-        if ($("#form").css("display") !== "none") {
+        if (!$("#form").is(":hidden")) {
             event.preventDefault()
         }
     });
     $(document).on("paste", function (event) {
-        if ($("#form").css("display") !== "none") {
+        if (!$("#form").is(":hidden")) {
             event.preventDefault()
             alert("Nice try! You have to type the answer, not copy and paste it.")
         }
     });
     $(document).on("dragstart", function (event) {
-        if ($("#form").css("display") !== "none") {
+        if (!$("#form").is(":hidden")) {
             event.preventDefault()
         }
     });

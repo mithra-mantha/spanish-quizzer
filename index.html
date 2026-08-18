@@ -29,7 +29,6 @@
         <strong>Alt + Y</strong> → ü <br>
         <strong>Alt + Q</strong> → Next question/submit answer <br>
         <strong>Alt + M</strong> → I got this question correct/wrong <br>
-        For more information visit the <a href="../">homepage</a>.
     </p>
     </details>
     <div id="quiz-box" data-current-question="" data-question-array="">
@@ -133,7 +132,7 @@
                     <div id="uploaded-file-sign">No file chosen</div>
                     <input id="upload-file" type="file" aria-label="Upload a file here" accept=".json, .quiz.json" required class="no-listener-clear">
                     <span id="uploaded-file-invalid-warning"></span>
-                    <button type="submit" id="uploaded-file-submit" class="no-listener-clear">Submit</button><br>
+                    <button type="submit" id="uploaded-file-submit" class="no-listener-clear" title="Please first upload a file." disabled>Submit</button><br>
                 </form>
             </details>
             <p>Your progress will be saved, even if you exit/reload the page later. If you want to restart from the beginning, press "reset".</p>
@@ -145,7 +144,7 @@
     </div>
     <dialog id="user-question-dialog" class="no-listener-clear">
         <div id="dialog-box">
-            <button aria-label="Close the popup dialog" id="close-dialog" class="no-listener-clear">✖</button>
+            <button aria-label="Close the popup dialog" id="close-dialog" class="no-listener-clear">&#x2716;</button>
         <h1>Custom quiz</h1>
         <div>
             Enter your custom quiz below in the following format:
@@ -181,7 +180,7 @@
         </form>
         </div>
     </dialog>
-    <p id="version" aria-hidden="true">V105</p>
+    <p id="version" aria-hidden="true">V106</p>
     <script data-goatcounter="https://mithra-mantha.goatcounter.com/count"
         async src="https://gc.zgo.at/count.js"></script> <!--This is to count how many viewers go on the site...it does NOT track them across the web, it just tells me how many people and from what countries and browsers.-->
 </body>

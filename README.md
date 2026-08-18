@@ -7,7 +7,7 @@ You select a course, chapter, and topic from the Senderos Curriculum. It quizzes
 If you don't like the preloaded questions, you can create your own by typing into a field with ## for question and == for the answer, and save it. You can also generate a link and share it or back it up on your device as a .json file.
 
 ## Keyboard shortcuts
-There are multiple keyboard shorcuts installed to make it easy to operate the site.
+There are multiple keyboard shortcuts installed to make it easy to operate the site.
 * Alt + vowel(A, E, I, O, U): Types an accented version of the vowel. Works with shift for caps.
 * Alt + N: Types an ñ. Works with shift for caps.
 * Alt + Y: Types a ü. Works with shift for caps.
@@ -64,5 +64,16 @@ The current question and the array of questions are defined as data-* attributes
 3. Depending on their state-
     * Question: Proceed as normal. Set the normal stuff(again, using code copy pasted from setUpQuestion because triggering it directly requires an event object with the .preventDefault() method).
     * Answer: Make the question disappear and trigger checkAnswer(). Run a smaller version of checkAnswer to figure out whether the user got it correct or wrong. However, no variable modification is needed because the variables were saved AFTER they were modified.
+### Custom quiz feature:
+1. User clicks button and a dialog modal opens.
+2. They enter their stuff.
+3. customQuizDialogSubmit() is called when the user submits. It uses processUserQuiz() which returns the finished quiz object if it is valid, or a string if it is not.
+    * If it is a string, then display the error message.
+    * Else, undisable the copy link and the file upload buttons, and add event listeners for them.
+#### Copy link feature:
+Basically, it uses JSON.stringify() on the object that processUserQuiz() generated, and then uses LZString.compressToEncodedURIComponent() on that to compress it further so that more quizzes will fit(It also does the side job of making the string valid for a url).
+Once that's done, it is appended as a hash to the main url. For example: mithra-mantha.github.io/spanish-quizzer#[string of characters generated]. The url is capped at around 2000 characters because most sharing platforms cut off links if they are longer than that.
 
-
+On the receiving end, it checks if the hash exists in $(document).ready(), and then if it does, decompresses it with LZString and then uses JSON.parse(). It then begins the quiz.
+#### File upload feature:
+Once the button is clicked, it takes the same object that the copy link feature used, runs the same thing through JSON.stringify(), and then adds it to a Blob, which is this built in class in browsers for files. A URL is generated for the Blob, and a link is added to the body with that URL. The link is then programmatically "clicked", which triggers the download, after which the link is immediately removed. Clever way, but it works! On the receiving end, the text content is extracted and it is used for the quiz just like in the copy link feature.
